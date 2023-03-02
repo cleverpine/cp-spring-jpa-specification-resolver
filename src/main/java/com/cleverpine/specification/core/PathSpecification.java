@@ -15,6 +15,15 @@ import java.util.Objects;
 
 import static com.cleverpine.specification.util.FilterConstants.*;
 
+/**
+ * A base class for specifications that involve a path to an attribute in the target entity {@link T}.
+ * It implements the {@link org.springframework.data.jpa.domain.Specification} interface and provides methods for building
+ * the path to the attribute, either as a join or a fetch join, depending on the value of the {@link QueryContext#isEntityDistinctRequired()}.
+ * This class is meant to be extended by concrete implementation of a specification that use the path to an attribute in various ways, such as for
+ * filtering, sorting, or grouping.
+ *
+ * @param <T>
+ */
 @RequiredArgsConstructor
 @Getter
 public abstract class PathSpecification<T> implements Specification<T> {
@@ -23,6 +32,14 @@ public abstract class PathSpecification<T> implements Specification<T> {
 
     private final QueryContext<T> queryContext;
 
+    /**
+     * Builds a join path to the attribute in the entity, starting from the root. It splits the attribute's path.
+     *
+     * @param root the root object of the query
+     * @param <G> the type of the attribute
+     *
+     * @return the join path to the attribute
+     */
     protected <G> Path<G> buildJoinPathToAttribute(Root<T> root) {
         if (isSingleAttributePath()) {
             return root.get(path);
@@ -41,6 +58,14 @@ public abstract class PathSpecification<T> implements Specification<T> {
         return joinPath.get(attribute);
     }
 
+    /**
+     * Builds a fetch path to the attribute in the entity, starting from the root. It splits the attribute's path.
+     *
+     * @param root the root object of the query
+     * @param <G> the type of the attribute
+     *
+     * @return the fetch path to the attribute
+     */
     protected <G> Path<G> buildFetchPathToAttribute(Root<T> root) {
         if (isSingleAttributePath()) {
             return root.get(path);
@@ -63,6 +88,12 @@ public abstract class PathSpecification<T> implements Specification<T> {
         return !path.contains(ATTRIBUTE_SEPARATOR);
     }
 
+    /**
+     * Gets the aliases of the join paths in the attribute path, in the order they appear.
+     *
+     * @param attributePathToken the path to the attribute, split into tokens
+     * @return the aliases of the join paths
+     */
     private Deque<String> getJoinPathAliases(String[] attributePathToken) {
         Deque<String> joinPathAliases = new ArrayDeque<>();
         Arrays.stream(Arrays.copyOfRange(attributePathToken, 0, attributePathToken.length - 1))
