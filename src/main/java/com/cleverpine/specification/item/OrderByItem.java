@@ -10,6 +10,10 @@ import org.springframework.data.jpa.domain.Specification;
 
 import java.util.Objects;
 
+/**
+ * Represents a sorting item used in a query to sort results based on a given attribute and sort direction.
+ * @param <T> the type of entity being queried
+ */
 @RequiredArgsConstructor
 @Getter
 public class OrderByItem<T> {
@@ -18,6 +22,11 @@ public class OrderByItem<T> {
 
     private final SortDirection direction;
 
+    /**
+     * Creates an {@link OrderBySpecification} for the attribute and sort direction of this order-by item.
+     * @param queryContext the context of the query being performed
+     * @return an {@link OrderBySpecification} for the attribute and sort direction of this order-by item
+     */
     public Specification<T> createSpecification(QueryContext<T> queryContext) {
         String fieldFullPath = queryContext.getPathToEntityField(getAttribute());
         String path = Objects.nonNull(fieldFullPath) ? fieldFullPath : getAttribute();

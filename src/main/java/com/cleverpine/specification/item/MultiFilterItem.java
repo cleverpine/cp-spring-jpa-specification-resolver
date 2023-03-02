@@ -13,15 +13,35 @@ import java.util.Objects;
 
 import static com.cleverpine.specification.util.FilterConstants.INVALID_SPECIFICATION_CREATION;
 
+/**
+ * An implementation of {@link FilterItem} that represents a filter with multiple values.
+ * @param <T> the type of the entity
+ */
 public class MultiFilterItem<T> extends FilterItem<T> {
 
     private final List<String> values;
 
+    /**
+     * Constructs a new {@link MultiFilterItem} instance with the specified attribute, operator, and values.
+     *
+     * @param attribute the name of the attribute to filter on
+     * @param operator the operator to use for the filter
+     * @param values the list of values to filter by
+     * @throws NullPointerException if the {@code attribute} or {@code values} parameter is {@code null}
+     */
     public MultiFilterItem(String attribute, FilterOperator operator, @NonNull List<String> values) {
         super(attribute, operator);
         this.values = values;
     }
 
+    /**
+     * Creates a new specification based on specification type.
+     *
+     * @param queryContext the query context to use for the specification
+     * @param valueConverter the value converter to use for the specification
+     * @return a new {@link Specification} instance based on this filter item
+     * @throws IllegalSpecificationException if the specification cannot be created
+     */
     @Override
     @SuppressWarnings("unchecked")
     public Specification<T> createSpecification(QueryContext<T> queryContext, ValueConverter valueConverter) {

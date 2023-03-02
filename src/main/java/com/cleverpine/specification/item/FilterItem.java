@@ -9,6 +9,11 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.jpa.domain.Specification;
 
+/**
+ * An abstract class representing a filter item, which consists of an attribute and an operator.
+ * Subclasses should implement the {@link #createSpecification(QueryContext queryContext, ValueConverter valueConverter)} method to create a custom Specification for the given filter item.
+ * @param <T> the type of the entity
+ */
 @RequiredArgsConstructor
 @Getter(AccessLevel.PROTECTED)
 public abstract class FilterItem<T> {
@@ -23,6 +28,13 @@ public abstract class FilterItem<T> {
         return attribute;
     }
 
+    /**
+     * Create a custom Specification for the filter item.
+     *
+     * @param queryContext The QueryContext to use for the specification.
+     * @param valueConverter The ValueConverter to use for the specification.
+     * @return A JPA Specification for the filter item.
+     */
     public abstract Specification<T> createSpecification(QueryContext<T> queryContext, ValueConverter valueConverter);
 
 }
