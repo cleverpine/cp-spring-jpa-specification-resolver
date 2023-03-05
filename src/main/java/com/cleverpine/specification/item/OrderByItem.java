@@ -8,8 +8,6 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.jpa.domain.Specification;
 
-import java.util.Objects;
-
 /**
  * Represents a sorting item used in a query to sort results based on a given attribute and sort direction.
  * @param <T> the type of entity being queried
@@ -28,8 +26,6 @@ public class OrderByItem<T> {
      * @return an {@link OrderBySpecification} for the attribute and sort direction of this order-by item
      */
     public Specification<T> createSpecification(QueryContext<T> queryContext) {
-        String fieldFullPath = queryContext.getPathToEntityField(getAttribute());
-        String path = Objects.nonNull(fieldFullPath) ? fieldFullPath : getAttribute();
-        return new OrderBySpecification<>(path, queryContext, direction);
+        return new OrderBySpecification<>(getAttribute(), queryContext, direction);
     }
 }

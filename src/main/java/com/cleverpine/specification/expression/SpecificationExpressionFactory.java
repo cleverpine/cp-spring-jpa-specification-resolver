@@ -11,7 +11,9 @@ import static com.cleverpine.specification.util.FilterConstants.INVALID_EXPRESSI
 public class SpecificationExpressionFactory {
 
     /**
-     * Creates a new SpecificationExpression from the given attribute path and query context.
+     * Creates a new SpecificationExpression from the given attribute path and query context. It creates a custom
+     * {@link SpecificationExpression} if there is a configured custom specification class for the given attribute path,
+     * otherwise it initializes a {@link PathSpecificationExpression} instance.
      *
      * @param attributePath the attribute path to create the expression for
      * @param queryContext  the query context to use in creating the expression
