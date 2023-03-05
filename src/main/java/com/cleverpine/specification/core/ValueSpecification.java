@@ -11,12 +11,12 @@ import lombok.Getter;
  * @param <T> the type of the entity being queried
  */
 @Getter
-public abstract class ValueSpecification<T> extends PathSpecification<T> {
+public abstract class ValueSpecification<T> extends CriteriaExpressionSpecification<T> {
 
     private final ValueConverter valueConverter;
 
-    public ValueSpecification(String path, QueryContext<T> queryContext, ValueConverter valueConverter) {
-        super(path, queryContext);
+    public ValueSpecification(String attributePath, QueryContext<T> queryContext, ValueConverter valueConverter) {
+        super(attributePath, queryContext);
         this.valueConverter = valueConverter;
     }
 

@@ -12,8 +12,8 @@ import static com.cleverpine.specification.util.FilterConstants.INVALID_VALUES_C
 
 /**
  * The {@link Between} class represents a multi-value specification that checks whether a given property falls within a specified
- * range of values. It extends the {@link MultiValueSpecification} abstract class and implements the {@link #toPredicate(Root, CriteriaQuery, CriteriaBuilder)}
- * method to generate a predicate for the criteria API.
+ * range of values. It extends the {@link MultiValueSpecification} abstract class and implements the
+ * {@link #toPredicate(Root, CriteriaQuery, CriteriaBuilder)} method to generate a predicate for the criteria API.
  *
  * @param <T> the type of the root entity
  */
@@ -24,13 +24,13 @@ public class Between<T> extends MultiValueSpecification<T> {
     /**
      * Constructs a new specification with the given attribute path, values, query context, and value converter.
      *
-     * @param path the path of the property to filter on
+     * @param attributePath the path of the property to filter on
      * @param values the list of two values to filter between
      * @param queryContext the query context to use for the specification that
      * @param valueConverter the value converter to use for converting values to the appropriate types
      */
-    public Between(String path, List<String> values, QueryContext<T> queryContext, ValueConverter valueConverter) {
-        super(path, values, queryContext, valueConverter);
+    public Between(String attributePath, List<String> values, QueryContext<T> queryContext, ValueConverter valueConverter) {
+        super(attributePath, values, queryContext, valueConverter);
     }
 
     /**
@@ -51,12 +51,12 @@ public class Between<T> extends MultiValueSpecification<T> {
                     String.format(INVALID_VALUES_COUNT, this.getClass().getSimpleName(), BETWEEN_VALUES_COUNT));
         }
 
-        Path<? extends Comparable<Object>> propertyPath = buildJoinPathToAttribute(root);
-        Class<? extends Comparable<Object>> propertyType = propertyPath.getJavaType();
+        Expression<? extends Comparable<Object>> criteriaExpression = buildCriteriaExpression(root, criteriaBuilder);
+        Class<? extends Comparable<Object>> propertyType = criteriaExpression.getJavaType();
 
         Comparable<Object> firstValue = getValueConverter().convertToComparable(propertyType, values.get(0));
         Comparable<Object> secondValue = getValueConverter().convertToComparable(propertyType, values.get(1));
-        return criteriaBuilder.between(propertyPath, firstValue, secondValue);
+        return criteriaBuilder.between(criteriaExpression, firstValue, secondValue);
     }
 
 }
