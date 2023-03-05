@@ -4,7 +4,7 @@ import com.cleverpine.specification.item.OrderByItem;
 
 import java.util.List;
 
-public interface SortParamParser {
+public interface SingleSortParser {
 
     <T>List<OrderByItem<T>> parseSortParam(String sortParam);
 }

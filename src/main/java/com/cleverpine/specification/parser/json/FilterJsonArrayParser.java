@@ -1,9 +1,10 @@
-package com.cleverpine.specification.parser;
+package com.cleverpine.specification.parser.json;
 
 import com.cleverpine.specification.exception.InvalidSpecificationException;
 import com.cleverpine.specification.item.FilterItem;
 import com.cleverpine.specification.item.MultiFilterItem;
 import com.cleverpine.specification.item.SingleFilterItem;
+import com.cleverpine.specification.parser.SingleFilterParser;
 import com.cleverpine.specification.util.FilterOperator;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -19,7 +20,7 @@ import java.util.stream.Collectors;
 import static com.cleverpine.specification.util.FilterConstants.*;
 
 @RequiredArgsConstructor
-public class FilterJsonArrayParser implements FilterParamParser {
+public class FilterJsonArrayParser implements SingleFilterParser {
 
     private static final Integer VALID_FILTER_ARGS_COUNT = 3;
 

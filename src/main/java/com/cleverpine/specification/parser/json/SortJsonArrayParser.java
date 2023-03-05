@@ -1,9 +1,10 @@
-package com.cleverpine.specification.parser;
+package com.cleverpine.specification.parser.json;
 
 import com.cleverpine.specification.exception.InvalidSpecificationException;
 
 import com.cleverpine.specification.item.OrderByItem;
 
+import com.cleverpine.specification.parser.SingleSortParser;
 import com.cleverpine.specification.util.SortDirection;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -14,13 +15,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import java.util.stream.Collectors;
-
 import static com.cleverpine.specification.util.FilterConstants.*;
 
 
 @RequiredArgsConstructor
-public class SortJsonArrayParser implements SortParamParser {
+public class SortJsonArrayParser implements SingleSortParser {
 
     private static final Integer VALID_SORT_ARGS_COUNT = 2;
 
