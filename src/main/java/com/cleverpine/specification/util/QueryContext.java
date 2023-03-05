@@ -1,5 +1,6 @@
 package com.cleverpine.specification.util;
 
+import com.cleverpine.specification.expression.SpecificationExpression;
 import com.cleverpine.specification.item.JoinItem;
 
 import javax.persistence.criteria.Join;
@@ -14,11 +15,14 @@ public class QueryContext<T> {
 
     private final SpecificationQueryConfig.AttributePathConfig<T> attributePathConfig;
 
+    private final SpecificationQueryConfig.CustomExpressionConfig<T> customExpressionConfig;
+
     private boolean entityDistinctRequired;
 
-    public QueryContext(SpecificationQueryConfig.JoinConfig<T> joinConfig, SpecificationQueryConfig.AttributePathConfig<T> attributePathConfig) {
-        this.joinConfig = joinConfig;
-        this.attributePathConfig = attributePathConfig;
+    public QueryContext(SpecificationQueryConfig<T> specificationQueryConfig) {
+        this.joinConfig = specificationQueryConfig.getJoinConfig();
+        this.attributePathConfig = specificationQueryConfig.getAttributePathConfig();
+        this.customExpressionConfig = specificationQueryConfig.getCustomExpressionConfig();
     }
 
     public void addJoin(String alias, Join<?, ?> join) {
@@ -33,7 +37,7 @@ public class QueryContext<T> {
         return joinsByAlias.get(alias);
     }
 
-    public String getPathToEntityField(String attribute) {
+    public String getPathToEntityAttribute(String attribute) {
         return attributePathConfig.getPathToEntityAttribute(attribute);
     }
 
@@ -54,4 +58,8 @@ public class QueryContext<T> {
         this.entityDistinctRequired = entityDistinctRequired;
     }
 
+    @SuppressWarnings("rawtypes")
+    public Class<? extends SpecificationExpression> getCustomSpecificationExpressionByAttribute(String attribute) {
+        return customExpressionConfig.getCustomSpecificationExpressionByAttribute(attribute);
+    }
 }
