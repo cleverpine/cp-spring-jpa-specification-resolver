@@ -61,4 +61,6 @@ public final class FilterConstants {
     public static final String EMPTY_STRING = "";
 
     public static final String PARSER_NOT_PROVIDED = "The filter/sort parameter is provided, but a parser is not found";
+
+    public static final Integer VALID_FILTER_ARGS_COUNT = 3;
 }

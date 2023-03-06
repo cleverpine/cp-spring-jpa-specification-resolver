@@ -3,10 +3,10 @@ package com.cleverpine.specification.producer;
 import com.cleverpine.specification.core.OrderBySpecification;
 import com.cleverpine.specification.item.FilterItem;
 import com.cleverpine.specification.item.OrderByItem;
-import com.cleverpine.specification.parser.FilterParamParser;
-import com.cleverpine.specification.parser.SortParamParser;
+import com.cleverpine.specification.parser.SpecificationParserManager;
 import com.cleverpine.specification.util.QueryContext;
 import com.cleverpine.specification.util.SpecificationQueryConfig;
+import com.cleverpine.specification.util.SpecificationRequest;
 import com.cleverpine.specification.util.ValueConverter;
 import org.springframework.data.jpa.domain.Specification;
 
@@ -19,96 +19,89 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+/**
+ * This class {@link ComplexSpecificationProducer} is responsible for producing complex specifications that involve
+ * multiple filter items and order by items. It uses the {@link SpecificationParserManager} to parse the {@link SpecificationRequest}
+ * and produce the filter and order by items. It then produces {@link Specification} objects using
+ * {@link SimpleSpecificationProducer} and combines them to create the final specification.
+ *
+ * @param <T> The type of the entity for which the specification is being produced.
+ */
 public class ComplexSpecificationProducer<T> {
 
-    private final SimpleSpecificationProducer simpleSpecificationProducer;
+    /**
+     * The {@link SpecificationParserManager} used to parse the {@link SpecificationRequest} and produce
+     * the filter and order by items.
+     */
+    private final SpecificationParserManager specificationParserManager;
 
-    private final FilterParamParser filterParamParser;
-
-    private final SortParamParser sortParamParser;
-
-    private final ValueConverter valueConverter;
-
+    /**
+     * The class representing the filter type, which holds the possible filter and sorting attributes.
+     */
     private final Class<?> filterType;
 
+    /**
+     * The {@link ValueConverter} used to convert the values in the filter values to the correct data type.
+     */
+    private final ValueConverter valueConverter;
+
+    /**
+     * The {@link SpecificationQueryConfig} containing the configuration for the specification.
+     */
     private final SpecificationQueryConfig<T> specificationQueryConfig;
 
-    public ComplexSpecificationProducer(SimpleSpecificationProducer simpleSpecificationProducer,
-                                        FilterParamParser filterParamParser,
-                                        SortParamParser sortParamParser,
-                                        ValueConverter valueConverter,
-                                        Class<?> filterType) {
-        this(simpleSpecificationProducer, filterParamParser, sortParamParser, valueConverter, filterType, SpecificationQueryConfig.<T>builder().build());
+    /**
+     * The {@link SimpleSpecificationProducer} used to produce simple specifications.
+     */
+    private final SimpleSpecificationProducer simpleSpecificationProducer = new SimpleSpecificationProducer();
+
+    public ComplexSpecificationProducer(SpecificationParserManager specificationParserManager,
+                                        Class<?> filterType,
+                                        ValueConverter valueConverter) {
+        this(specificationParserManager, filterType, valueConverter, SpecificationQueryConfig.<T>builder().build());
     }
 
-    public ComplexSpecificationProducer(SimpleSpecificationProducer simpleSpecificationProducer,
-                                        FilterParamParser filterParamParser,
-                                        SortParamParser sortParamParser,
-                                        ValueConverter valueConverter,
+    /**
+     * Creates a new instance of {@link ComplexSpecificationProducer} with the specified parser manager,
+     * filter type, value converter, and configuration.
+     *
+     * @param specificationParserManager the parser manager used to produce filter and order-by items from a specification request
+     * @param filterType                 the type of filter used in the query
+     * @param valueConverter             the converter used to convert values between different types
+     * @param specificationQueryConfig   the configuration used to create the query context
+     */
+    public ComplexSpecificationProducer(SpecificationParserManager specificationParserManager,
                                         Class<?> filterType,
+                                        ValueConverter valueConverter,
                                         SpecificationQueryConfig<T> specificationQueryConfig) {
-        this.simpleSpecificationProducer = simpleSpecificationProducer;
-        this.filterParamParser = filterParamParser;
-        this.sortParamParser = sortParamParser;
-        this.valueConverter = valueConverter;
+        this.specificationParserManager = specificationParserManager;
         this.filterType = filterType;
+        this.valueConverter = valueConverter;
         this.specificationQueryConfig = specificationQueryConfig;
     }
 
-    public Specification<T> createSpecification() {
-        return createSpecification(new ArrayList<>());
-    }
+    /**
+     * Creates a {@link Specification} instance from the given {@link SpecificationRequest} and based on the {@link SpecificationQueryConfig}.
+     * The produced {@link Specification} instance is composed of simple specifications produced by
+     * {@link SimpleSpecificationProducer}.
+     *
+     * @param specificationRequest the specification request that holds the filter and sort parameters
+     * @return the complex JPA Specification
+     */
+    public Specification<T> createSpecification(SpecificationRequest<T> specificationRequest) {
+        List<FilterItem<T>> requestFilterItems = specificationParserManager.produceFilterItems(specificationRequest);
+        List<FilterItem<T>> specificationFilterItems = getAllSpecificationFilterItems(requestFilterItems);
 
-    public Specification<T> createSpecification(String filterParam) {
-        List<FilterItem<T>> filterItems = filterParamParser.parseFilterParam(filterParam);
-        return createSpecification(filterItems, new ArrayList<>());
-    }
-    public Specification<T> createSpecification(String filterParam, List<FilterItem<T>> additionalFilterItems) {
-        List<FilterItem<T>> filterItems = new ArrayList<>();
-        filterItems.addAll(additionalFilterItems);
-        filterItems.addAll(filterParamParser.parseFilterParam(filterParam));
+        List<OrderByItem<T>> requestOrderByItems = specificationParserManager.produceOrderByItems(specificationRequest);
+        List<OrderByItem<T>> specificationOrderByItems = getAllSpecificationOrderByItems(requestOrderByItems);
 
-        return createSpecification(filterItems, new ArrayList<>());
-    }
-
-    public Specification<T> createSpecification(String filterParam, String sortParam) {
-        List<FilterItem<T>> filterItems = filterParamParser.parseFilterParam(filterParam);
-        List<OrderByItem<T>> orderItems = sortParamParser.parseSortParam(sortParam);
-        return createSpecification(filterItems, orderItems);
-    }
-
-    public Specification<T> createSpecification(String filterParam, List<FilterItem<T>> additionalFilterItems, String sortParam) {
-        List<FilterItem<T>> filterItems = new ArrayList<>();
-        filterItems.addAll(additionalFilterItems);
-        filterItems.addAll(filterParamParser.parseFilterParam(filterParam));
-        List<OrderByItem<T>> orderItems = new ArrayList<>();
-        orderItems.addAll(sortParamParser.parseSortParam(sortParam));
-        return createSpecification(filterItems, orderItems);
-    }
-
-
-    @SafeVarargs
-    public final Specification<T> createSpecification(OrderByItem<T>... orderItems) {
-        return createSpecification(new ArrayList<>(), List.of(orderItems));
-    }
-
-    public Specification<T> createSpecification(List<FilterItem<T>> filterItems) {
-        return createSpecification(filterItems, new ArrayList<>());
-    }
-
-    public Specification<T> createSpecification(List<FilterItem<T>> filterItems, List<OrderByItem<T>> orderItems) {
-        QueryContext<T> queryContext = new QueryContext<>(
-                specificationQueryConfig.getJoinConfig(),
-                specificationQueryConfig.getAttributePathConfig());
-
-        List<FilterItem<T>> specificationFilterItems = getAllSpecificationFilterItems(filterItems);
-        List<OrderByItem<T>> specificationOrderItems = getAllSpecificationOrderItems(orderItems);
+        QueryContext<T> queryContext = new QueryContext<>(specificationQueryConfig);
 
         List<Specification<T>> specifications = new ArrayList<>();
         specifications.addAll(simpleSpecificationProducer
                 .produceFilterSpecifications(filterType, specificationFilterItems, queryContext, valueConverter));
         specifications.addAll(simpleSpecificationProducer
-                .produceOrderBySpecifications(filterType, specificationOrderItems, queryContext));
+                .produceOrderBySpecifications(filterType, specificationOrderByItems, queryContext));
 
         return conjugate(specifications, queryContext);
     }
@@ -140,7 +133,7 @@ public class ComplexSpecificationProducer<T> {
         return specificationFilterItems;
     }
 
-    private List<OrderByItem<T>> getAllSpecificationOrderItems(List<OrderByItem<T>> orderItems) {
+    private List<OrderByItem<T>> getAllSpecificationOrderByItems(List<OrderByItem<T>> orderItems) {
         List<OrderByItem<T>> specificationOrderItems = new ArrayList<>();
         specificationOrderItems.addAll(orderItems);
         specificationOrderItems.addAll(specificationQueryConfig.getOrderByConfig().getOrderByItems());

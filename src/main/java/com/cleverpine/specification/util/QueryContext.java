@@ -7,6 +7,13 @@ import javax.persistence.criteria.Join;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * A utility class to hold context information required to build JPA criteria queries using
+ * {@link SpecificationExpression}. It provides access to {@link Join} objects and attribute paths
+ * configured in {@link SpecificationQueryConfig} to be used while building the criteria query.
+ *
+ * @param <T> the type of the root entity
+ */
 public class QueryContext<T> {
 
     private final Map<String, Join<?, ?>> joinsByAlias = new HashMap<>();
