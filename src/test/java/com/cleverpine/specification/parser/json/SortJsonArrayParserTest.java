@@ -1,7 +1,6 @@
-package com.cleverpine.specification.parser;
+package com.cleverpine.specification.parser.json;
 
 import com.cleverpine.specification.exception.InvalidSpecificationException;
-import com.cleverpine.specification.item.FilterItem;
 import com.cleverpine.specification.item.OrderByItem;
 import com.cleverpine.specification.util.ValueConverter;
 import com.fasterxml.jackson.core.JsonProcessingException;

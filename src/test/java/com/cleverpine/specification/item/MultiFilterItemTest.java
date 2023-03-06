@@ -66,7 +66,7 @@ public class MultiFilterItemTest {
                 new MultiFilterItem<>(ATTRIBUTE, FilterOperator.EQUAL, VALUES);
 
         SpecificationQueryConfig<Object> queryConfig = SpecificationQueryConfig.builder().build();
-        QueryContext<Object> queryContext = new QueryContext<>(queryConfig.getJoinConfig(), queryConfig.getAttributePathConfig());
+        QueryContext<Object> queryContext = new QueryContext<>(queryConfig);
 
         assertThrows(
                 IllegalSpecificationException.class,
@@ -80,7 +80,7 @@ public class MultiFilterItemTest {
                 new MultiFilterItem<>(ATTRIBUTE, FilterOperator.IN, VALUES);
 
         SpecificationQueryConfig<Object> queryConfig = SpecificationQueryConfig.builder().build();
-        QueryContext<Object> queryContext = new QueryContext<>(queryConfig.getJoinConfig(), queryConfig.getAttributePathConfig());
+        QueryContext<Object> queryContext = new QueryContext<>(queryConfig);
 
         Specification<Object> specification =
                 inFilterItem.createSpecification(queryContext, valueConverter);
@@ -94,34 +94,13 @@ public class MultiFilterItemTest {
                 new MultiFilterItem<>(ATTRIBUTE, FILTER_OPERATOR, VALUES);
 
         SpecificationQueryConfig<Object> queryConfig = SpecificationQueryConfig.builder().build();
-        QueryContext<Object> queryContext = new QueryContext<>(queryConfig.getJoinConfig(), queryConfig.getAttributePathConfig());
+        QueryContext<Object> queryContext = new QueryContext<>(queryConfig);
 
         Between<Object> specification =
                 (Between<Object>) betweenFilterItem
                         .createSpecification(queryContext, valueConverter);
 
-        assertEquals(ATTRIBUTE, specification.getPath());
-    }
-
-    @Test
-    void createSpecification_whenPathToEntityAttributeIsPresent_shouldOverrideTheAttributeFromTheFilterItemAsPath() {
-        MultiFilterItem<Object> betweenFilterItem =
-                new MultiFilterItem<>(ATTRIBUTE, FILTER_OPERATOR, VALUES);
-
-        String expectedPath = "first.second";
-
-        SpecificationQueryConfig<Object> queryConfig = SpecificationQueryConfig.builder()
-                .attributePathConfig()
-                    .addAttributePathMapping(ATTRIBUTE, expectedPath)
-                    .end()
-                .build();
-        QueryContext<Object> queryContext = new QueryContext<>(queryConfig.getJoinConfig(), queryConfig.getAttributePathConfig());
-
-        Between<Object> specification =
-                (Between<Object>) betweenFilterItem
-                        .createSpecification(queryContext, valueConverter);
-
-        assertEquals(expectedPath, specification.getPath());
+        assertEquals(ATTRIBUTE, specification.getAttributePath());
     }
 
 }

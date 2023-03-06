@@ -1,8 +1,6 @@
 package com.cleverpine.specification.integration.test;
 
-import com.cleverpine.specification.parser.FilterParamParser;
-import com.cleverpine.specification.parser.SortParamParser;
-import com.cleverpine.specification.producer.SimpleSpecificationProducer;
+import com.cleverpine.specification.parser.SpecificationParserManager;
 import com.cleverpine.specification.util.ValueConverter;
 import org.junit.jupiter.api.BeforeAll;
 import org.springframework.data.jpa.domain.Specification;
@@ -22,21 +20,13 @@ public class SpecificationProducerIntegrationTest {
 
     protected static EntityManager entityManager;
 
-    protected final SimpleSpecificationProducer simpleSpecificationProducer;
-
-    protected final FilterParamParser filterParamParser;
-
-    protected final SortParamParser sortParamParser;
+    protected final SpecificationParserManager specificationParserManager;
 
     protected final ValueConverter valueConverter;
 
-    protected SpecificationProducerIntegrationTest(SimpleSpecificationProducer simpleSpecificationProducer,
-                                                   FilterParamParser filterParamParser,
-                                                   SortParamParser sortParamParser,
+    protected SpecificationProducerIntegrationTest(SpecificationParserManager specificationParserManager,
                                                    ValueConverter valueConverter) {
-        this.simpleSpecificationProducer = simpleSpecificationProducer;
-        this.filterParamParser = filterParamParser;
-        this.sortParamParser = sortParamParser;
+        this.specificationParserManager = specificationParserManager;
         this.valueConverter = valueConverter;
     }
 
@@ -74,9 +64,7 @@ public class SpecificationProducerIntegrationTest {
                                 sortParamItems.get(0),
                                 sortParamItems.get(1)))
                 .collect(Collectors.joining(","));
-        return String.format("[%s]", collect); }
-
-
+        return collect; }
 
 
         private <T > CriteriaQuery < T > getQuery(Specification < T > specification, Class < T > entityType) {

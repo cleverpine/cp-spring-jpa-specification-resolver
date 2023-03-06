@@ -2,7 +2,7 @@ package com.cleverpine.specification.util;
 
 import org.junit.jupiter.api.Test;
 
-import static com.cleverpine.specification.util.FilterConstants.ATTRIBUTE_SEPARATOR;
+import static com.cleverpine.specification.util.FilterConstants.ENTITY_ATTRIBUTE_SEPARATOR;
 import static com.cleverpine.specification.util.FilterConstants.EMPTY_STRING;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -27,7 +27,7 @@ public class SpecificationUtilTest {
         String secondArgument = "name";
 
         String actual = SpecificationUtil.buildFullPathToEntityAttribute(firstArgument, secondArgument);
-        String expected = firstArgument + ATTRIBUTE_SEPARATOR + secondArgument;
+        String expected = firstArgument + ENTITY_ATTRIBUTE_SEPARATOR + secondArgument;
         assertEquals(expected, actual);
     }
 

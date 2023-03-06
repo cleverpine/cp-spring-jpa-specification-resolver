@@ -5,11 +5,13 @@ import com.cleverpine.specification.exception.InvalidSpecificationException;
 import com.cleverpine.specification.integration.criteria.MovieFilterCriteria;
 import com.cleverpine.specification.integration.entity.Actor;
 import com.cleverpine.specification.integration.entity.Movie;
-import com.cleverpine.specification.item.*;
-import com.cleverpine.specification.parser.FilterJsonArrayParser;
-import com.cleverpine.specification.parser.SortJsonArrayParser;
+import com.cleverpine.specification.item.FilterItem;
+import com.cleverpine.specification.item.MultiFilterItem;
+import com.cleverpine.specification.item.SingleFilterItem;
+import com.cleverpine.specification.parser.SpecificationParserManager;
+import com.cleverpine.specification.parser.json.FilterJsonArrayParser;
+import com.cleverpine.specification.parser.json.SortJsonArrayParser;
 import com.cleverpine.specification.producer.ComplexSpecificationProducer;
-import com.cleverpine.specification.producer.SimpleSpecificationProducer;
 import com.cleverpine.specification.util.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -17,7 +19,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.data.jpa.domain.Specification;
 
 import javax.persistence.criteria.JoinType;
-import java.util.*;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -49,27 +53,33 @@ public class SpecificationProducerIT extends SpecificationProducerIntegrationTes
 
 
     public SpecificationProducerIT() {
-        super(new SimpleSpecificationProducer(), new FilterJsonArrayParser(new ObjectMapper()), new SortJsonArrayParser(new ObjectMapper()), VALUE_CONVERTER);
+        super(SpecificationParserManager.builder()
+                .withSingleFilterParser(new FilterJsonArrayParser(new ObjectMapper()))
+                .withSingleSortParser(new SortJsonArrayParser(new ObjectMapper()))
+                .build(),
+                VALUE_CONVERTER);
     }
 
     @BeforeEach
     void setUp() {
         movieSpecificationProducer = new ComplexSpecificationProducer<>(
-                simpleSpecificationProducer,
-                filterParamParser,
-                sortParamParser,
-                valueConverter,
+                specificationParserManager,
                 MovieFilterCriteria.class,
+                valueConverter,
                 SPECIFICATION_QUERY_CONFIG);
     }
 
     @Test
     void createSpecification_onInvalidFilterParam_shouldThrow() {
-        String filterParam = "[[\"id\",\"=\"]]";
+        String filterParam = "[[\"id\",\"eq\"]]";
+
+        SpecificationRequest<Movie> specificationRequest = SpecificationRequest.<Movie>builder()
+                .withFilterParam(filterParam)
+                .build();
 
         assertThrows(
                 InvalidSpecificationException.class,
-                () -> movieSpecificationProducer.createSpecification(filterParam)
+                () -> movieSpecificationProducer.createSpecification(specificationRequest)
         );
     }
 
@@ -77,11 +87,15 @@ public class SpecificationProducerIT extends SpecificationProducerIntegrationTes
     void createSpecification_onInvalidFilterAttribute_shouldThrow() {
         String filterParam = createJsonArrayFilterParam(
                 List.of(
-                        List.of("invalid", "=", "test")));
+                        List.of("invalid", "eq", "test")));
+
+        SpecificationRequest<Movie> specificationRequest = SpecificationRequest.<Movie>builder()
+                .withFilterParam(filterParam)
+                .build();
 
         assertThrows(
                 InvalidSpecificationException.class,
-                () -> movieSpecificationProducer.createSpecification(filterParam)
+                () -> movieSpecificationProducer.createSpecification(specificationRequest)
         );
     }
 
@@ -90,9 +104,13 @@ public class SpecificationProducerIT extends SpecificationProducerIntegrationTes
         String expectedMovieTitle = "Fast and Furious";
         String filterParam = createJsonArrayFilterParam(
                 List.of(
-                        List.of("title", "=", expectedMovieTitle)));
+                        List.of("title", "eq", expectedMovieTitle)));
 
-        Specification<Movie> movieSpecification = movieSpecificationProducer.createSpecification(filterParam);
+        SpecificationRequest<Movie> specificationRequest = SpecificationRequest.<Movie>builder()
+                .withFilterParam(filterParam)
+                .build();
+
+        Specification<Movie> movieSpecification = movieSpecificationProducer.createSpecification(specificationRequest);
         Movie actual = findOne(movieSpecification, Movie.class);
 
         assertNotNull(actual);
@@ -103,16 +121,18 @@ public class SpecificationProducerIT extends SpecificationProducerIntegrationTes
     void findOne_onEqualForEntityAttributeThatNotExists_shouldThrowException() {
         String filterParam = createJsonArrayFilterParam(
                 List.of(
-                        List.of("movieTitle", "=", "Fast and Furious")));
+                        List.of("movieTitle", "eq", "Fast and Furious")));
 
         ComplexSpecificationProducer<Movie> specificationProducer = new ComplexSpecificationProducer<>(
-                simpleSpecificationProducer,
-                filterParamParser,
-                sortParamParser,
-                valueConverter,
-                MovieFilterCriteria.class);
+                specificationParserManager,
+                MovieFilterCriteria.class,
+                valueConverter);
 
-        Specification<Movie> movieSpecification = specificationProducer.createSpecification(filterParam);
+        SpecificationRequest<Movie> specificationRequest = SpecificationRequest.<Movie>builder()
+                .withFilterParam(filterParam)
+                .build();
+
+        Specification<Movie> movieSpecification = specificationProducer.createSpecification(specificationRequest);
 
         assertThrows(
                 IllegalArgumentException.class,
@@ -125,9 +145,13 @@ public class SpecificationProducerIT extends SpecificationProducerIntegrationTes
         String expectedMovieTitle = "Fast and Furious";
         String filterParam = createJsonArrayFilterParam(
                 List.of(
-                        List.of("movieTitle", "=", expectedMovieTitle)));
+                        List.of("movieTitle", "eq", expectedMovieTitle)));
 
-        Specification<Movie> movieSpecification = movieSpecificationProducer.createSpecification(filterParam);
+        SpecificationRequest<Movie> specificationRequest = SpecificationRequest.<Movie>builder()
+                .withFilterParam(filterParam)
+                .build();
+
+        Specification<Movie> movieSpecification = movieSpecificationProducer.createSpecification(specificationRequest);
         Movie actual = findOne(movieSpecification, Movie.class);
 
         assertNotNull(actual);
@@ -138,16 +162,18 @@ public class SpecificationProducerIT extends SpecificationProducerIntegrationTes
     void findOne_onEqualForRelationalEntityAttributeAndNoJoinAndNoMappingToRelationalEntityIsPresent_shouldThrow() {
         String filterParam = createJsonArrayFilterParam(
                 List.of(
-                        List.of("genreName", "=", "Action")));
+                        List.of("genreName", "eq", "Action")));
 
         ComplexSpecificationProducer<Movie> specificationProducer = new ComplexSpecificationProducer<>(
-                simpleSpecificationProducer,
-                filterParamParser,
-                sortParamParser,
-                valueConverter,
-                MovieFilterCriteria.class);
+                specificationParserManager,
+                MovieFilterCriteria.class,
+                valueConverter);
 
-        Specification<Movie> movieSpecification = specificationProducer.createSpecification(filterParam);
+        SpecificationRequest<Movie> specificationRequest = SpecificationRequest.<Movie>builder()
+                .withFilterParam(filterParam)
+                .build();
+
+        Specification<Movie> movieSpecification = specificationProducer.createSpecification(specificationRequest);
 
         assertThrows(
                 IllegalArgumentException.class,
@@ -159,7 +185,7 @@ public class SpecificationProducerIT extends SpecificationProducerIntegrationTes
     void findOne_onEqualForRelationalEntityAttributeAndMappingToRelationalEntityIsPresentButNoJoin_shouldThrow() {
         String filterParam = createJsonArrayFilterParam(
                 List.of(
-                        List.of("genreName", "=", "Action")));
+                        List.of("genreName", "eq", "Action")));
 
         SpecificationQueryConfig<Movie> specificationQueryConfig = SpecificationQueryConfig.<Movie>builder()
                 .attributePathConfig()
@@ -168,14 +194,16 @@ public class SpecificationProducerIT extends SpecificationProducerIntegrationTes
                 .build();
 
         ComplexSpecificationProducer<Movie> specificationProducer = new ComplexSpecificationProducer<>(
-                simpleSpecificationProducer,
-                filterParamParser,
-                sortParamParser,
-                valueConverter,
+                specificationParserManager,
                 MovieFilterCriteria.class,
+                valueConverter,
                 specificationQueryConfig);
 
-        Specification<Movie> movieSpecification = specificationProducer.createSpecification(filterParam);
+        SpecificationRequest<Movie> specificationRequest = SpecificationRequest.<Movie>builder()
+                .withFilterParam(filterParam)
+                .build();
+
+        Specification<Movie> movieSpecification = specificationProducer.createSpecification(specificationRequest);
 
         assertThrows(
                 IllegalSpecificationException.class,
@@ -187,7 +215,7 @@ public class SpecificationProducerIT extends SpecificationProducerIntegrationTes
     void findOne_onEqualForRelationalEntityAttributeAndJoinIsPresentButNoMappingToRelationalEntityAttribute_shouldThrow() {
         String filterParam = createJsonArrayFilterParam(
                 List.of(
-                        List.of("genreName", "=", "Action")));
+                        List.of("genreName", "eq", "Action")));
 
         SpecificationQueryConfig<Movie> specificationQueryConfig = SpecificationQueryConfig.<Movie>builder()
                 .joinConfig()
@@ -196,14 +224,16 @@ public class SpecificationProducerIT extends SpecificationProducerIntegrationTes
                 .build();
 
         ComplexSpecificationProducer<Movie> specificationProducer = new ComplexSpecificationProducer<>(
-                simpleSpecificationProducer,
-                filterParamParser,
-                sortParamParser,
-                valueConverter,
+                specificationParserManager,
                 MovieFilterCriteria.class,
+                valueConverter,
                 specificationQueryConfig);
 
-        Specification<Movie> movieSpecification = specificationProducer.createSpecification(filterParam);
+        SpecificationRequest<Movie> specificationRequest = SpecificationRequest.<Movie>builder()
+                .withFilterParam(filterParam)
+                .build();
+
+        Specification<Movie> movieSpecification = specificationProducer.createSpecification(specificationRequest);
 
         assertThrows(
                 IllegalArgumentException.class,
@@ -216,9 +246,13 @@ public class SpecificationProducerIT extends SpecificationProducerIntegrationTes
         String expectedGenre = "Action";
         String filterParam = createJsonArrayFilterParam(
                 List.of(
-                        List.of("genreName", "=", expectedGenre)));
+                        List.of("genreName", "eq", expectedGenre)));
 
-        Specification<Movie> movieSpecification = movieSpecificationProducer.createSpecification(filterParam);
+        SpecificationRequest<Movie> specificationRequest = SpecificationRequest.<Movie>builder()
+                .withFilterParam(filterParam)
+                .build();
+
+        Specification<Movie> movieSpecification = movieSpecificationProducer.createSpecification(specificationRequest);
 
         List<Movie> actual = findAll(movieSpecification, Movie.class);
 
@@ -235,7 +269,7 @@ public class SpecificationProducerIT extends SpecificationProducerIntegrationTes
         String expectedGenre = "Action";
         String filterParam = createJsonArrayFilterParam(
                 List.of(
-                        List.of("genreName", "=", expectedGenre)));
+                        List.of("genreName", "eq", expectedGenre)));
 
         SpecificationQueryConfig<Movie> specificationQueryConfig = SpecificationQueryConfig.<Movie>builder()
                 .joinConfig()
@@ -247,14 +281,16 @@ public class SpecificationProducerIT extends SpecificationProducerIntegrationTes
                 .build();
 
         ComplexSpecificationProducer<Movie> specificationProducer = new ComplexSpecificationProducer<>(
-                simpleSpecificationProducer,
-                filterParamParser,
-                sortParamParser,
-                valueConverter,
+                specificationParserManager,
                 MovieFilterCriteria.class,
+                valueConverter,
                 specificationQueryConfig);
 
-        Specification<Movie> movieSpecification = specificationProducer.createSpecification(filterParam);
+        SpecificationRequest<Movie> specificationRequest = SpecificationRequest.<Movie>builder()
+                .withFilterParam(filterParam)
+                .build();
+
+        Specification<Movie> movieSpecification = specificationProducer.createSpecification(specificationRequest);
 
         assertThrows(
                 IllegalSpecificationException.class,
@@ -267,9 +303,13 @@ public class SpecificationProducerIT extends SpecificationProducerIntegrationTes
         String unexpectedGenre = "Action";
         String filterParam = createJsonArrayFilterParam(
                 List.of(
-                        List.of("genreName", "!=", unexpectedGenre)));
+                        List.of("genreName", "neq", unexpectedGenre)));
 
-        Specification<Movie> movieSpecification = movieSpecificationProducer.createSpecification(filterParam);
+        SpecificationRequest<Movie> specificationRequest = SpecificationRequest.<Movie>builder()
+                .withFilterParam(filterParam)
+                .build();
+
+        Specification<Movie> movieSpecification = movieSpecificationProducer.createSpecification(specificationRequest);
 
         List<Movie> actual = findAll(movieSpecification, Movie.class);
 
@@ -284,9 +324,13 @@ public class SpecificationProducerIT extends SpecificationProducerIntegrationTes
         Long expectedIdGreaterThan = 1L;
         String filterParam = createJsonArrayFilterParam(
                 List.of(
-                        List.of("id", ">", expectedIdGreaterThan.toString())));
+                        List.of("id", "gt", expectedIdGreaterThan.toString())));
 
-        Specification<Movie> movieSpecification = movieSpecificationProducer.createSpecification(filterParam);
+        SpecificationRequest<Movie> specificationRequest = SpecificationRequest.<Movie>builder()
+                .withFilterParam(filterParam)
+                .build();
+
+        Specification<Movie> movieSpecification = movieSpecificationProducer.createSpecification(specificationRequest);
 
         List<Movie> actual = findAll(movieSpecification, Movie.class);
 
@@ -301,9 +345,13 @@ public class SpecificationProducerIT extends SpecificationProducerIntegrationTes
         Long expectedIdLessThan = 2L;
         String filterParam = createJsonArrayFilterParam(
                 List.of(
-                        List.of("id", "<", expectedIdLessThan.toString())));
+                        List.of("id", "lt", expectedIdLessThan.toString())));
 
-        Specification<Movie> movieSpecification = movieSpecificationProducer.createSpecification(filterParam);
+        SpecificationRequest<Movie> specificationRequest = SpecificationRequest.<Movie>builder()
+                .withFilterParam(filterParam)
+                .build();
+
+        Specification<Movie> movieSpecification = movieSpecificationProducer.createSpecification(specificationRequest);
 
         List<Movie> actual = findAll(movieSpecification, Movie.class);
 
@@ -318,9 +366,13 @@ public class SpecificationProducerIT extends SpecificationProducerIntegrationTes
         Long expectedIdGreaterThanOrEqual = 2L;
         String filterParam = createJsonArrayFilterParam(
                 List.of(
-                        List.of("id", ">=", expectedIdGreaterThanOrEqual.toString())));
+                        List.of("id", "gte", expectedIdGreaterThanOrEqual.toString())));
 
-        Specification<Movie> movieSpecification = movieSpecificationProducer.createSpecification(filterParam);
+        SpecificationRequest<Movie> specificationRequest = SpecificationRequest.<Movie>builder()
+                .withFilterParam(filterParam)
+                .build();
+
+        Specification<Movie> movieSpecification = movieSpecificationProducer.createSpecification(specificationRequest);
 
         List<Movie> actual = findAll(movieSpecification, Movie.class);
 
@@ -335,9 +387,13 @@ public class SpecificationProducerIT extends SpecificationProducerIntegrationTes
         Long expectedIdLessThanOrEqual = 2L;
         String filterParam = createJsonArrayFilterParam(
                 List.of(
-                        List.of("id", "<=", expectedIdLessThanOrEqual.toString())));
+                        List.of("id", "lte", expectedIdLessThanOrEqual.toString())));
 
-        Specification<Movie> movieSpecification = movieSpecificationProducer.createSpecification(filterParam);
+        SpecificationRequest<Movie> specificationRequest = SpecificationRequest.<Movie>builder()
+                .withFilterParam(filterParam)
+                .build();
+
+        Specification<Movie> movieSpecification = movieSpecificationProducer.createSpecification(specificationRequest);
 
         List<Movie> actual = findAll(movieSpecification, Movie.class);
 
@@ -354,7 +410,11 @@ public class SpecificationProducerIT extends SpecificationProducerIntegrationTes
                 List.of(
                         List.of("title", "like", expectedMovieTitleContains)));
 
-        Specification<Movie> movieSpecification = movieSpecificationProducer.createSpecification(filterParam);
+        SpecificationRequest<Movie> specificationRequest = SpecificationRequest.<Movie>builder()
+                .withFilterParam(filterParam)
+                .build();
+
+        Specification<Movie> movieSpecification = movieSpecificationProducer.createSpecification(specificationRequest);
 
         List<Movie> actual = findAll(movieSpecification, Movie.class);
 
@@ -373,7 +433,11 @@ public class SpecificationProducerIT extends SpecificationProducerIntegrationTes
                 List.of(
                         List.of("id", "between", String.format("[\\\"%d\\\",\\\"%d\\\"]", firstValue, secondValue))));
 
-        Specification<Movie> movieSpecification = movieSpecificationProducer.createSpecification(filterParam);
+        SpecificationRequest<Movie> specificationRequest = SpecificationRequest.<Movie>builder()
+                .withFilterParam(filterParam)
+                .build();
+
+        Specification<Movie> movieSpecification = movieSpecificationProducer.createSpecification(specificationRequest);
 
         List<Movie> actual = findAll(movieSpecification, Movie.class);
 
@@ -392,7 +456,11 @@ public class SpecificationProducerIT extends SpecificationProducerIntegrationTes
                 List.of(
                         List.of("title", "in", String.format("[\\\"%s\\\",\\\"%s\\\"]", firstMovie, secondMovie))));
 
-        Specification<Movie> movieSpecification = movieSpecificationProducer.createSpecification(filterParam);
+        SpecificationRequest<Movie> specificationRequest = SpecificationRequest.<Movie>builder()
+                .withFilterParam(filterParam)
+                .build();
+
+        Specification<Movie> movieSpecification = movieSpecificationProducer.createSpecification(specificationRequest);
 
         List<Movie> actual = findAll(movieSpecification, Movie.class);
 
@@ -410,10 +478,14 @@ public class SpecificationProducerIT extends SpecificationProducerIntegrationTes
 
         String filterParam = createJsonArrayFilterParam(
                 List.of(
-                        List.of("genreName", "=", expectedGenre),
-                        List.of("title", "=", expectedMovie)));
+                        List.of("genreName", "eq", expectedGenre),
+                        List.of("title", "eq", expectedMovie)));
 
-        Specification<Movie> movieSpecification = movieSpecificationProducer.createSpecification(filterParam);
+        SpecificationRequest<Movie> specificationRequest = SpecificationRequest.<Movie>builder()
+                .withFilterParam(filterParam)
+                .build();
+
+        Specification<Movie> movieSpecification = movieSpecificationProducer.createSpecification(specificationRequest);
 
         List<Movie> actual = findAll(movieSpecification, Movie.class);
 
@@ -437,14 +509,14 @@ public class SpecificationProducerIT extends SpecificationProducerIntegrationTes
                 .build();
 
         ComplexSpecificationProducer<Movie> specificationProducer = new ComplexSpecificationProducer<>(
-                simpleSpecificationProducer,
-                filterParamParser,
-                sortParamParser,
-                valueConverter,
+                specificationParserManager,
                 MovieFilterCriteria.class,
+                valueConverter,
                 specificationQueryConfig);
 
-        Specification<Movie> movieSpecification = specificationProducer.createSpecification();
+        SpecificationRequest<Movie> specificationRequest = SpecificationRequest.createEmpty();
+
+        Specification<Movie> movieSpecification = specificationProducer.createSpecification(specificationRequest);
 
         List<Movie> actual = findAll(movieSpecification, Movie.class);
         List<Movie> expected = actual.stream()
@@ -463,16 +535,16 @@ public class SpecificationProducerIT extends SpecificationProducerIntegrationTes
                 .build();
 
         ComplexSpecificationProducer<Movie> specificationProducer = new ComplexSpecificationProducer<>(
-                simpleSpecificationProducer,
-                filterParamParser,
-                sortParamParser,
-                valueConverter,
+                specificationParserManager,
                 MovieFilterCriteria.class,
+                valueConverter,
                 specificationQueryConfig);
+
+        SpecificationRequest<Movie> specificationRequest = SpecificationRequest.createEmpty();
 
         assertThrows(
                 InvalidSpecificationException.class,
-                specificationProducer::createSpecification
+                () -> specificationProducer.createSpecification(specificationRequest)
         );
     }
 
@@ -488,14 +560,14 @@ public class SpecificationProducerIT extends SpecificationProducerIntegrationTes
                 .build();
 
         ComplexSpecificationProducer<Movie> specificationProducer = new ComplexSpecificationProducer<>(
-                simpleSpecificationProducer,
-                filterParamParser,
-                sortParamParser,
-                valueConverter,
+                specificationParserManager,
                 MovieFilterCriteria.class,
+                valueConverter,
                 specificationQueryConfig);
 
-        Specification<Movie> movieSpecification = specificationProducer.createSpecification();
+        SpecificationRequest<Movie> specificationRequest = SpecificationRequest.createEmpty();
+
+        Specification<Movie> movieSpecification = specificationProducer.createSpecification(specificationRequest);
 
         assertThrows(
                 IllegalSpecificationException.class,
@@ -519,14 +591,14 @@ public class SpecificationProducerIT extends SpecificationProducerIntegrationTes
                 .build();
 
         ComplexSpecificationProducer<Movie> specificationProducer = new ComplexSpecificationProducer<>(
-                simpleSpecificationProducer,
-                filterParamParser,
-                sortParamParser,
-                valueConverter,
+                specificationParserManager,
                 MovieFilterCriteria.class,
+                valueConverter,
                 specificationQueryConfig);
 
-        Specification<Movie> movieSpecification = specificationProducer.createSpecification();
+        SpecificationRequest<Movie> specificationRequest = SpecificationRequest.createEmpty();
+
+        Specification<Movie> movieSpecification = specificationProducer.createSpecification(specificationRequest);
 
         List<Movie> actual = findAll(movieSpecification, Movie.class);
         List<Movie> expected = actual.stream()
@@ -552,15 +624,18 @@ public class SpecificationProducerIT extends SpecificationProducerIntegrationTes
                 .build();
 
         ComplexSpecificationProducer<Movie> specificationProducer = new ComplexSpecificationProducer<>(
-                simpleSpecificationProducer,
-                filterParamParser,
-                sortParamParser,
-                valueConverter,
+                specificationParserManager,
                 MovieFilterCriteria.class,
+                valueConverter,
                 specificationQueryConfig);
 
         List<FilterItem<Movie>> filterItems = List.of(new MultiFilterItem<>("genreName", FilterOperator.IN, List.of("Horror", "Comedy")));
-        Specification<Movie> movieSpecification = specificationProducer.createSpecification(filterItems);
+
+        SpecificationRequest<Movie> specificationRequest = SpecificationRequest.<Movie>builder()
+                .withFilterItems(filterItems)
+                .build();
+
+        Specification<Movie> movieSpecification = specificationProducer.createSpecification(specificationRequest);
 
         List<Movie> actual = findAll(movieSpecification, Movie.class);
         List<Movie> expected = actual.stream()
@@ -588,17 +663,19 @@ public class SpecificationProducerIT extends SpecificationProducerIntegrationTes
                 .build();
 
         ComplexSpecificationProducer<Movie> specificationProducer = new ComplexSpecificationProducer<>(
-                simpleSpecificationProducer,
-                filterParamParser,
-                sortParamParser,
-                valueConverter,
+                specificationParserManager,
                 MovieFilterCriteria.class,
+                valueConverter,
                 specificationQueryConfig);
 
-        Specification<Movie> movieSpecification =
-                specificationProducer.createSpecification(List.of(
+        SpecificationRequest<Movie> specificationRequest = SpecificationRequest.<Movie>builder()
+                .withFilterItems(List.of(
                         new SingleFilterItem<>("actorFirstName", FilterOperator.EQUAL, "Ryan"),
-                        new SingleFilterItem<>("actorLastName", FilterOperator.EQUAL, "Reynolds")));
+                        new SingleFilterItem<>("actorLastName", FilterOperator.EQUAL, "Reynolds")))
+                .build();
+
+        Specification<Movie> movieSpecification =
+                specificationProducer.createSpecification(specificationRequest);
 
         List<Movie> actual = findAll(movieSpecification, Movie.class);
         actual.forEach(movie ->
@@ -624,16 +701,18 @@ public class SpecificationProducerIT extends SpecificationProducerIntegrationTes
                 .build();
 
         ComplexSpecificationProducer<Movie> specificationProducer = new ComplexSpecificationProducer<>(
-                simpleSpecificationProducer,
-                filterParamParser,
-                sortParamParser,
-                valueConverter,
+                specificationParserManager,
                 MovieFilterCriteria.class,
+                valueConverter,
                 specificationQueryConfig);
 
+        SpecificationRequest<Movie> specificationRequest = SpecificationRequest.<Movie>builder()
+                .withFilterItems(List.of(
+                        new MultiFilterItem<>("actorFirstName", FilterOperator.IN, List.of("Ryan", "Morena"))))
+                .build();
+
         Specification<Movie> movieSpecification =
-                specificationProducer.createSpecification(List.of(
-                        new MultiFilterItem<>("actorFirstName", FilterOperator.IN, List.of("Ryan", "Morena"))));
+                specificationProducer.createSpecification(specificationRequest);
 
         List<Movie> actual = findAll(movieSpecification, Movie.class);
         Set<Long> movieIds = actual.stream().map(Movie::getId).collect(Collectors.toSet());
@@ -659,16 +738,18 @@ public class SpecificationProducerIT extends SpecificationProducerIntegrationTes
                 .build();
 
         ComplexSpecificationProducer<Movie> specificationProducer = new ComplexSpecificationProducer<>(
-                simpleSpecificationProducer,
-                filterParamParser,
-                sortParamParser,
-                valueConverter,
+                specificationParserManager,
                 MovieFilterCriteria.class,
+                valueConverter,
                 specificationQueryConfig);
 
+        SpecificationRequest<Movie> specificationRequest = SpecificationRequest.<Movie>builder()
+                .withFilterItems(List.of(
+                        new MultiFilterItem<>("actorFirstName", FilterOperator.IN, List.of("Ryan", "Morena"))))
+                .build();
+
         Specification<Movie> movieSpecification =
-                specificationProducer.createSpecification(List.of(
-                        new MultiFilterItem<>("actorFirstName", FilterOperator.IN, List.of("Ryan", "Morena"))));
+                specificationProducer.createSpecification(specificationRequest);
 
         List<Movie> actual = findAll(movieSpecification, Movie.class);
         Set<Long> movieIds = actual.stream().map(Movie::getId).collect(Collectors.toSet());
@@ -683,9 +764,14 @@ public class SpecificationProducerIT extends SpecificationProducerIntegrationTes
                 List.of(
                         List.of("title", "desc")));
 
+        SpecificationRequest<Movie> specificationRequest = SpecificationRequest.<Movie>builder()
+                .withFilterParam(filterParam)
+                .withSortParam(sortParam)
+                .build();
+
         assertThrows(
                 InvalidSpecificationException.class,
-                () -> movieSpecificationProducer.createSpecification(filterParam, sortParam)
+                () -> movieSpecificationProducer.createSpecification(specificationRequest)
         );
     }
 
@@ -696,10 +782,14 @@ public class SpecificationProducerIT extends SpecificationProducerIntegrationTes
                         List.of("title", "=", "random")));
         String sortParam = "[[\"id\",\"=\"]]";
 
+        SpecificationRequest<Movie> specificationRequest = SpecificationRequest.<Movie>builder()
+                .withFilterParam(filterParam)
+                .withSortParam(sortParam)
+                .build();
 
         assertThrows(
                 InvalidSpecificationException.class,
-                () -> movieSpecificationProducer.createSpecification(filterParam, sortParam)
+                () -> movieSpecificationProducer.createSpecification(specificationRequest)
         );
     }
 
@@ -710,10 +800,14 @@ public class SpecificationProducerIT extends SpecificationProducerIntegrationTes
                         List.of("invalid", "=", "test")));
         String sortParam = "[[\"id\"]]";
 
+        SpecificationRequest<Movie> specificationRequest = SpecificationRequest.<Movie>builder()
+                .withFilterParam(filterParam)
+                .withSortParam(sortParam)
+                .build();
 
         assertThrows(
                 InvalidSpecificationException.class,
-                () -> movieSpecificationProducer.createSpecification(filterParam, sortParam)
+                () -> movieSpecificationProducer.createSpecification(specificationRequest)
         );
     }
 
@@ -729,8 +823,12 @@ public class SpecificationProducerIT extends SpecificationProducerIntegrationTes
                 List.of(
                         List.of("id", "desc")));
 
+        SpecificationRequest<Movie> specificationRequest = SpecificationRequest.<Movie>builder()
+                .withFilterParam(filterParam)
+                .withSortParam(sortParam)
+                .build();
 
-        Specification<Movie> movieSpecification = movieSpecificationProducer.createSpecification(filterParam, sortParam);
+        Specification<Movie> movieSpecification = movieSpecificationProducer.createSpecification(specificationRequest);
         List<Movie> actual = findAll(movieSpecification, Movie.class);
         Movie firstMovie = actual.get(0);
         Movie secondMovie = actual.get(1);
@@ -739,7 +837,5 @@ public class SpecificationProducerIT extends SpecificationProducerIntegrationTes
         assertNotNull(actual);
         assertTrue(firstMovie.getGenre().getName().equals(firstGenre) || firstMovie.getGenre().getName().equals(secondGenre));
     }
-
-
 
 }
