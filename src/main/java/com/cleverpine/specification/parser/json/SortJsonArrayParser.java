@@ -17,7 +17,17 @@ import java.util.Objects;
 
 import static com.cleverpine.specification.util.FilterConstants.*;
 
-
+/**
+ * The {@link SortJsonArrayParser} class provides a way to parse a sort parameter represented as a JSON array.
+ * Implements the {@link SingleSortParser} interface which allows it to be used as a single sort parser.
+ * <p>
+ * A valid sort parameter should contain an array with two values:
+ * the sort attribute and the sort direction (asc/desc).
+ * <p>
+ * The class uses Jackson's {@link ObjectMapper} to deserialize the JSON parameter into a list of strings.
+ * <p>
+ * The class throws an {@link InvalidSpecificationException} if the provided sort parameter is invalid.
+ */
 @RequiredArgsConstructor
 public class SortJsonArrayParser implements SingleSortParser {
 
@@ -27,6 +37,16 @@ public class SortJsonArrayParser implements SingleSortParser {
 
     private final ObjectMapper objectMapper;
 
+    /**
+     * Parses a sort parameter represented as a JSON array.
+     * The provided parameter should contain an array with two values:
+     * the sort attribute and the sort direction (asc/desc).
+     *
+     * @param sortParam the sort parameter represented as a JSON array
+     * @param <T> the type of the entity to be sorted
+     * @return a list with a single {@code OrderByItem} that contains the parsed sort parameter
+     * @throws InvalidSpecificationException if the provided sort parameter is invalid
+     */
     @Override
     public <T> List<OrderByItem<T>> parseSortParam(String sortParam) {
         if (Objects.isNull(sortParam) || sortParam.isEmpty()) {

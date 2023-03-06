@@ -16,9 +16,14 @@ import java.util.stream.Stream;
 
 import static com.cleverpine.specification.util.FilterConstants.PARSER_NOT_PROVIDED;
 
+/**
+ * {@link SpecificationParserManager} is responsible for processing the specification requests {@link SpecificationRequest} and producing the filter and sort items.
+ * The class contains SingleFilterParser, MultipleFilterParser, SingleSortParser, and MultipleSortParser instances in the constructor.
+ * The {@link #produceFilterItems(SpecificationRequest)} and {@link #produceOrderByItems(SpecificationRequest)} methods process the specification requests and return the filter and sorting lists respectively.
+ */
 @RequiredArgsConstructor
 @Builder(setterPrefix = "with")
-public class SpecificationRequestProcessor {
+public class SpecificationParserManager {
 
     private final SingleFilterParser singleFilterParser;
 
@@ -28,6 +33,13 @@ public class SpecificationRequestProcessor {
 
     private final MultipleSortParser multipleSortParser;
 
+    /**
+     * Processes the given specification request and returns the list of {@link FilterItem}.
+     * The method first parses the single filter parameter and then the multiple filter parameters.
+     * <p>
+     * @param specificationRequest the SpecificationRequest instance containing the filter and sort parameters
+     * @return the list of {@link FilterItem} parsed from the specification request
+     */
     public <T> List<FilterItem<T>> produceFilterItems(SpecificationRequest<T> specificationRequest) {
         return Stream.of(parseSingleFilterParam(specificationRequest),
                         parseMultipleFilterParams(specificationRequest),
@@ -37,6 +49,13 @@ public class SpecificationRequestProcessor {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Processes the given specification request and returns the list of {@link OrderByItem}.
+     * The method first parses the single sort parameter and then the multiple sort parameters.
+     * <p>
+     * @param specificationRequest the SpecificationRequest instance containing the sort and sort parameters
+     * @return the list of {@link OrderByItem} parsed from the specification request
+     */
     public <T> List<OrderByItem<T>> produceOrderByItems(SpecificationRequest<T> specificationRequest) {
         return Stream.of(parseSingleSortParam(specificationRequest),
                         parseMultipleSortParams(specificationRequest),
