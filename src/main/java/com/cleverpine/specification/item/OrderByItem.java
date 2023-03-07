@@ -5,6 +5,7 @@ import com.cleverpine.specification.core.OrderBySpecification;
 import com.cleverpine.specification.util.QueryContext;
 import com.cleverpine.specification.util.SortDirection;
 import lombok.Getter;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.jpa.domain.Specification;
 
@@ -16,8 +17,10 @@ import org.springframework.data.jpa.domain.Specification;
 @Getter
 public class OrderByItem<T> {
 
+    @NonNull
     private final String attribute;
 
+    @NonNull
     private final SortDirection direction;
 
     /**
@@ -25,7 +28,7 @@ public class OrderByItem<T> {
      * @param queryContext the context of the query being performed
      * @return an {@link OrderBySpecification} for the attribute and sort direction of this order-by item
      */
-    public Specification<T> createSpecification(QueryContext<T> queryContext) {
+    public Specification<T> createSpecification(@NonNull QueryContext<T> queryContext) {
         return new OrderBySpecification<>(getAttribute(), queryContext, direction);
     }
 }
