@@ -12,6 +12,11 @@ import java.util.Optional;
 
 import static com.cleverpine.specification.util.FilterConstants.*;
 
+/**
+ * The {@link FilterOperator} enumeration defines different types of operators that can be used in a filter
+ * expression. Each operator has a unique value, a corresponding {@link Specification} implementation
+ * class, and a flag indicating if it requires a single filter value or a range of filter values.
+ */
 @RequiredArgsConstructor
 @Getter
 public enum FilterOperator {
@@ -39,6 +44,13 @@ public enum FilterOperator {
 
     private final boolean singleFilterValue;
 
+    /**
+     * Returns the {@link FilterOperator} enumeration value corresponding to the provided operator value.
+     *
+     * @param value The operator value to find the corresponding enumeration value for.
+     * @return An {@link Optional} object containing the corresponding {@link FilterOperator} value if one exists,
+     *         or an empty {@link Optional} object if one does not.
+     */
     public static Optional<FilterOperator> getByValue(String value) {
         return Optional.ofNullable(VALUES.get(value));
     }

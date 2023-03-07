@@ -12,6 +12,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * This class represents a configuration object for creating a JPA specification query.
+ * The {@link SpecificationQueryConfig} object contains various nested objects that define how to build
+ * the JPA specification query.
+ *
+ * @param <T> The entity type to which the JPA specification query is applied.
+ */
 @RequiredArgsConstructor
 @Getter
 public class SpecificationQueryConfig<T> {

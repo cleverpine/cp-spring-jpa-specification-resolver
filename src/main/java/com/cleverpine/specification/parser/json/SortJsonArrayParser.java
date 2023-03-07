@@ -1,11 +1,9 @@
 package com.cleverpine.specification.parser.json;
 
 import com.cleverpine.specification.exception.InvalidSpecificationException;
-
 import com.cleverpine.specification.item.OrderByItem;
-
 import com.cleverpine.specification.parser.SingleSortParser;
-import com.cleverpine.specification.util.SortDirection;
+import com.cleverpine.specification.util.SpecificationUtil;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -15,7 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import static com.cleverpine.specification.util.FilterConstants.*;
+import static com.cleverpine.specification.util.FilterConstants.INVALID_SORT_QUERY_PARAMETER;
 
 /**
  * The {@link SortJsonArrayParser} class provides a way to parse a sort parameter represented as a JSON array.
@@ -31,8 +29,6 @@ import static com.cleverpine.specification.util.FilterConstants.*;
 @RequiredArgsConstructor
 public class SortJsonArrayParser implements SingleSortParser {
 
-    private static final Integer VALID_SORT_ARGS_COUNT = 2;
-
     private static final String SORT_PARAM_TYPE = "Json array";
 
     private final ObjectMapper objectMapper;
@@ -43,7 +39,7 @@ public class SortJsonArrayParser implements SingleSortParser {
      * the sort attribute and the sort direction (asc/desc).
      *
      * @param sortParam the sort parameter represented as a JSON array
-     * @param <T> the type of the entity to be sorted
+     * @param <T>       the type of the entity to be sorted
      * @return a list with a single {@code OrderByItem} that contains the parsed sort parameter
      * @throws InvalidSpecificationException if the provided sort parameter is invalid
      */
@@ -54,35 +50,20 @@ public class SortJsonArrayParser implements SingleSortParser {
         }
 
         List<OrderByItem<T>> createdSortItem = new ArrayList<>();
-        createdSortItem.add(createSortItem(parseJson(sortParam, new TypeReference<>() {})));
+        createdSortItem.add(SpecificationUtil.createSortItem(parseJson(sortParam, new TypeReference<>() {
+        })));
 
         return createdSortItem;
-
     }
 
-    private <T> OrderByItem<T> createSortItem(List<String> sortArgs) {
-        if (!isSortItemValid(sortArgs)) {
-            throw new InvalidSpecificationException(
-                    String.format(INVALID_SORT_ARGS_COUNT, VALID_SORT_ARGS_COUNT));
-        }
-
-        String sortAttribute = sortArgs.get(0);
-        String value = sortArgs.get(1).toUpperCase();
-
-        SortDirection sortDirection = getSortDirection(value);
-
-        return new OrderByItem<>(sortAttribute, sortDirection);
-
-    }
-
-    private SortDirection getSortDirection(String value) {
-        try {
-            return SortDirection.valueOf(value);
-        } catch (IllegalArgumentException e) {
-            throw new InvalidSpecificationException(String.format(INVALID_SORT_DIRECTION, value.toLowerCase()));
-        }
-    }
-
+    /**
+     * Method that parses a JSON string into a desired Java object using the Jackson library.
+     *
+     * @param json       the JSON string to be parsed.
+     * @param targetType the type of the target object.
+     * @return the parsed Java object.
+     * @throws InvalidSpecificationException if the JSON string is invalid or cannot be parsed.
+     */
     private <T> T parseJson(String json, TypeReference<T> targetType) {
         try {
             return objectMapper.readValue(json, targetType);
@@ -90,9 +71,5 @@ public class SortJsonArrayParser implements SingleSortParser {
             throw new InvalidSpecificationException(
                     String.format(INVALID_SORT_QUERY_PARAMETER, SORT_PARAM_TYPE));
         }
-    }
-
-    private boolean isSortItemValid(List<String> filterArgs) {
-        return filterArgs.size() == VALID_SORT_ARGS_COUNT;
     }
 }

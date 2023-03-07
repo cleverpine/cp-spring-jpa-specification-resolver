@@ -5,7 +5,7 @@ import com.cleverpine.specification.item.FilterItem;
 import com.cleverpine.specification.item.MultiFilterItem;
 import com.cleverpine.specification.item.SingleFilterItem;
 import com.cleverpine.specification.parser.SingleFilterParser;
-import com.cleverpine.specification.util.FilterOperator;
+import com.cleverpine.specification.util.SpecificationUtil;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -14,10 +14,10 @@ import lombok.RequiredArgsConstructor;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static com.cleverpine.specification.util.FilterConstants.*;
+import static com.cleverpine.specification.util.FilterConstants.INVALID_FILTER_QUERY_PARAMETER;
 
 /**
  * This class is responsible for parsing a JSON array of filter parameters and returning a list of {@link FilterItem}.
@@ -58,47 +58,34 @@ public class FilterJsonArrayParser implements SingleFilterParser {
         if (Objects.isNull(filterParam) || filterParam.isEmpty()) {
             return new ArrayList<>();
         }
-        return parseJson(filterParam, new TypeReference<List<List<String>>>() {})
+        return parseJson(filterParam, new TypeReference<List<List<String>>>() {
+        })
                 .stream()
                 .map(this::<T>createFilterItem)
                 .collect(Collectors.toList());
     }
 
     /**
-     * Creates a {@link FilterItem} from a list of filter item arguments.
-     * Validates the number of arguments in the list, and throws an exception if it is not equal to 3.
-     * Extracts the filter attribute, operator value, and value from the list of arguments.
-     * Creates a {@link SingleFilterItem} if the operator is a single value operator,
-     * or a {@link MultiFilterItem} if the operator is a multi-value operator.
+     * Method that creates a {@link FilterItem} from a list of strings representing a filter item.
+     * Uses a Function to parse multiple values if the operator is a multi-value operator.
      *
-     * @param filterArgs the list of filter item arguments.
-     * @return a {@link FilterItem} parsed from the list of filter item arguments.
-     * @throws InvalidSpecificationException if the list of filter item arguments is invalid.
+     * @param filterArgs the list of strings representing a filter item.
+     * @return a FilterItem created from the list of strings.
      */
     private <T> FilterItem<T> createFilterItem(List<String> filterArgs) {
-        if (!isFilterItemValid(filterArgs)) {
-            throw new InvalidSpecificationException(
-                    String.format(INVALID_FILTER_ARGS_COUNT, VALID_FILTER_ARGS_COUNT));
-        }
-
-        String filterAttribute = filterArgs.get(0);
-        String operatorValue = filterArgs.get(1);
-        String value = filterArgs.get(2);
-
-        Optional<FilterOperator> operatorCandidate = FilterOperator.getByValue(operatorValue);
-        if (operatorCandidate.isEmpty()) {
-            throw new InvalidSpecificationException(String.format(INVALID_FILTER_OPERATOR, operatorValue));
-        }
-
-        FilterOperator operator = operatorCandidate.get();
-        if (operator.isSingleFilterValue()) {
-            return new SingleFilterItem<>(filterAttribute, operator, value);
-        } else {
-            List<String> values = parseJson(value, new TypeReference<>() {});
-            return new MultiFilterItem<>(filterAttribute, operator, values);
-        }
+        Function<String, List<String>> multipleValuesParser = values -> parseJson(values, new TypeReference<>() {
+        });
+        return SpecificationUtil.createFilterItem(filterArgs, multipleValuesParser);
     }
 
+    /**
+     * Method that parses a JSON string into a desired Java object using the Jackson library.
+     *
+     * @param json       the JSON string to be parsed.
+     * @param targetType the type of the target object.
+     * @return the parsed Java object.
+     * @throws InvalidSpecificationException if the JSON string is invalid or cannot be parsed.
+     */
     private <T> T parseJson(String json, TypeReference<T> targetType) {
         try {
             return objectMapper.readValue(json, targetType);
@@ -107,9 +94,4 @@ public class FilterJsonArrayParser implements SingleFilterParser {
                     String.format(INVALID_FILTER_QUERY_PARAMETER, FILTER_PARAM_TYPE));
         }
     }
-
-    private boolean isFilterItemValid(List<String> filterArgs) {
-        return filterArgs.size() == VALID_FILTER_ARGS_COUNT;
-    }
-
 }

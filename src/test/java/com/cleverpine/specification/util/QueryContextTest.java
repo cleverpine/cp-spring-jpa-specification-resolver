@@ -1,5 +1,7 @@
 package com.cleverpine.specification.util;
 
+import com.cleverpine.specification.expression.PathSpecificationExpression;
+import com.cleverpine.specification.expression.SpecificationExpression;
 import com.cleverpine.specification.item.JoinItem;
 import org.junit.jupiter.api.Test;
 
@@ -87,6 +89,32 @@ public class QueryContextTest {
         assertTrue(queryContext.isEntityDistinctRequired());
         queryContext.clearState();
         assertFalse(queryContext.isEntityDistinctRequired());
+    }
+
+    @Test
+    void getCustomSpecificationExpressionByAttribute_whenACustomExpressionIsNotFoundForTheAttribute_shouldReturnNull() {
+        SpecificationQueryConfig<Object> queryConfig = SpecificationQueryConfig.builder()
+                .customExpressionConfig()
+                .addCustomSpecificationExpression("attribute", PathSpecificationExpression.class)
+                .end()
+                .build();
+        QueryContext<Object> queryContext = new QueryContext<>(queryConfig);
+
+        Class<? extends SpecificationExpression> actual = queryContext.getCustomSpecificationExpressionByAttribute("not-found-attribute");
+        assertNull(actual);
+    }
+
+    @Test
+    void getCustomSpecificationExpressionByAttribute_whenACustomExpressionIsPresentForTheAttribute_shouldReturnTheExpressionType() {
+        SpecificationQueryConfig<Object> queryConfig = SpecificationQueryConfig.builder()
+                .customExpressionConfig()
+                .addCustomSpecificationExpression("attribute", PathSpecificationExpression.class)
+                .end()
+                .build();
+        QueryContext<Object> queryContext = new QueryContext<>(queryConfig);
+
+        Class<? extends SpecificationExpression> actual = queryContext.getCustomSpecificationExpressionByAttribute("attribute");
+        assertEquals(PathSpecificationExpression.class, actual);
     }
 
 }
