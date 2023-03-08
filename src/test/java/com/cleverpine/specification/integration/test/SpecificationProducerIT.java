@@ -5,6 +5,7 @@ import com.cleverpine.specification.exception.InvalidSpecificationException;
 import com.cleverpine.specification.integration.criteria.MovieFilterCriteria;
 import com.cleverpine.specification.integration.entity.Actor;
 import com.cleverpine.specification.integration.entity.Movie;
+import com.cleverpine.specification.integration.expression.MovieTitleAndGenreSpecExpression;
 import com.cleverpine.specification.item.FilterItem;
 import com.cleverpine.specification.item.MultiFilterItem;
 import com.cleverpine.specification.item.SingleFilterItem;
@@ -836,6 +837,72 @@ public class SpecificationProducerIT extends SpecificationProducerIntegrationTes
         assertTrue(firstMovie.getId() > secondMovie.getId());
         assertNotNull(actual);
         assertTrue(firstMovie.getGenre().getName().equals(firstGenre) || firstMovie.getGenre().getName().equals(secondGenre));
+    }
+
+    @Test
+    void findAll_withDefaultFilterItems_shouldReturnValidResult() {
+        SpecificationQueryConfig<Movie> specificationQueryConfig = SpecificationQueryConfig.<Movie>builder()
+                .joinConfig()
+                    .defineJoinClause(Movie.class, "genre", "g", JoinType.INNER)
+                    .end()
+                .attributePathConfig()
+                    .addAttributePathMapping("genreName", "g.name")
+                    .end()
+                .filterConfig()
+                    .addFilter("genreName", FilterOperator.EQUAL, "Comedy")
+                    .end()
+                .build();
+
+        ComplexSpecificationProducer<Movie> specificationProducer = new ComplexSpecificationProducer<>(
+                specificationParserManager,
+                MovieFilterCriteria.class,
+                valueConverter,
+                specificationQueryConfig);
+
+        SpecificationRequest<Movie> specificationRequest = SpecificationRequest.createEmpty();
+
+        Specification<Movie> movieSpecification = specificationProducer.createSpecification(specificationRequest);
+        List<Movie> actual = findAll(movieSpecification, Movie.class);
+
+        assertEquals(2, actual.size());
+
+        actual.forEach(movie -> assertEquals("Comedy", movie.getGenre().getName()));
+    }
+
+    @Test
+    void findAll_onCustomAttributeExpression_shouldReturnValidResult() {
+        SpecificationQueryConfig<Movie> specificationQueryConfig = SpecificationQueryConfig.<Movie>builder()
+                .joinConfig()
+                    .defineJoinClause(Movie.class, "genre", "g", JoinType.INNER)
+                    .end()
+                .attributePathConfig()
+                    .addAttributePathMapping("genreName", "g.name")
+                    .end()
+                .customExpressionConfig()
+                    .addCustomSpecificationExpression("titleGenreName", MovieTitleAndGenreSpecExpression.class)
+                    .end()
+                .build();
+
+        ComplexSpecificationProducer<Movie> specificationProducer = new ComplexSpecificationProducer<>(
+                specificationParserManager,
+                MovieFilterCriteria.class,
+                valueConverter,
+                specificationQueryConfig);
+
+
+        SpecificationRequest<Movie> specificationRequest = SpecificationRequest.<Movie>builder()
+                .withFilterItems(List.of(new SingleFilterItem<>("titleGenreName", FilterOperator.EQUAL, "ITHorror")))
+                .build();
+
+        Specification<Movie> movieSpecification = specificationProducer.createSpecification(specificationRequest);
+        List<Movie> actual = findAll(movieSpecification, Movie.class);
+
+        assertEquals(1, actual.size());
+
+        Movie actualMovie = actual.get(0);
+
+        assertEquals("IT", actualMovie.getTitle());
+        assertEquals("Horror", actualMovie.getGenre().getName());
     }
 
 }

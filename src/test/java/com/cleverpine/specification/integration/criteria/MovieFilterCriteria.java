@@ -17,4 +17,6 @@ public class MovieFilterCriteria {
 
     private Long movieTitle;
 
+    private String titleGenreName;
+
 }
