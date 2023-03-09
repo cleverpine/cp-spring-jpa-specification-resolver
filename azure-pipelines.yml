@@ -25,7 +25,7 @@ steps:
   - script: |
       mvn --version
       env
-      cp $(settings.secureFilePath) /usr/share/apache-maven-3.9.0/conf/settings.xml
+      cp $(settings.secureFilePath) /usr/share/apache-maven-3.8.7/conf/settings.xml
 
   - task: Maven@3
     inputs:
