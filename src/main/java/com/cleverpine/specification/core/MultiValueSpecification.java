@@ -19,13 +19,13 @@ public abstract class MultiValueSpecification<T> extends ValueSpecification<T> {
     /**
      * Constructor for a MultiValueSpecification.
      *
-     * @param path the path for the specification
+     * @param attributePath the path for the specification
      * @param values the list of values for the specification
      * @param queryContext the query context for the specification
      * @param valueConverter the value converter for the specification
      */
-    public MultiValueSpecification(String path, List<String> values, QueryContext<T> queryContext, ValueConverter valueConverter) {
-        super(path, queryContext, valueConverter);
+    public MultiValueSpecification(String attributePath, List<String> values, QueryContext<T> queryContext, ValueConverter valueConverter) {
+        super(attributePath, queryContext, valueConverter);
         this.values = values;
     }
 }

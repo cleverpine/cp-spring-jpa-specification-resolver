@@ -1,4 +1,4 @@
-package com.cleverpine.specification.parser;
+package com.cleverpine.specification.parser.json;
 
 import com.cleverpine.specification.exception.InvalidSpecificationException;
 import com.cleverpine.specification.item.FilterItem;
@@ -96,11 +96,11 @@ public class FilterJsonArrayParserTest {
 
     @Test
     void parseFilterParam_onValidFilterParamAndFilterOperator_shouldReturnListOfFilterItems() throws JsonProcessingException {
-        List<List<String>> parsedResult = List.of(List.of("attribute", "=", "15"));
+        List<List<String>> parsedResult = List.of(List.of("attribute", "eq", "15"));
         when(objectMapper.readValue(anyString(), any(TypeReference.class)))
                 .thenReturn(parsedResult);
 
-        String jsonArray = "[[\"attribute\",\"=\", \"15\"]]";
+        String jsonArray = "[[\"attribute\",\"eq\", \"15\"]]";
 
         List<FilterItem<Object>> actual = filterJsonArrayParser.parseFilterParam(jsonArray);
         assertNotNull(actual);
@@ -109,11 +109,11 @@ public class FilterJsonArrayParserTest {
 
     @Test
     void parseFilterParam_onValidFilterParamAndSingleFilterOperator_shouldReturnListOfSingleFilterItem() throws JsonProcessingException {
-        List<List<String>> parsedResult = List.of(List.of("attribute", "=", "15"));
+        List<List<String>> parsedResult = List.of(List.of("attribute", "eq", "15"));
         when(objectMapper.readValue(anyString(), any(TypeReference.class)))
                 .thenReturn(parsedResult);
 
-        String jsonArray = "[[\"attribute\",\"=\", \"15\"]]";
+        String jsonArray = "[[\"attribute\",\"eq\", \"15\"]]";
 
         List<FilterItem<Object>> actual = filterJsonArrayParser.parseFilterParam(jsonArray);
         FilterItem<Object> filterItem = actual.get(0);

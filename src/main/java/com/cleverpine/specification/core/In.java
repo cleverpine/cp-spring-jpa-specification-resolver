@@ -18,13 +18,13 @@ public class In<T> extends MultiValueSpecification<T> {
     /**
      * Constructs a new specification with the given attribute path, values, query context, and value converter.
      *
-     * @param path the path of the property to filter on
+     * @param attributePath the path of the property to filter on
      * @param values the list of values that the property's value must be within
      * @param queryContext the query context to use for the specification that
      * @param valueConverter the value converter to use for converting values to the appropriate types
      */
-    public In(String path, List<String> values, QueryContext<T> queryContext, ValueConverter valueConverter) {
-        super(path, values, queryContext, valueConverter);
+    public In(String attributePath, List<String> values, QueryContext<T> queryContext, ValueConverter valueConverter) {
+        super(attributePath, values, queryContext, valueConverter);
     }
 
     /**
@@ -38,9 +38,9 @@ public class In<T> extends MultiValueSpecification<T> {
      */
     @Override
     public Predicate toPredicate(Root<T> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
-        Path<Object> propertyPath = buildJoinPathToAttribute(root);
-        Class<?> propertyType = propertyPath.getJavaType();
-        return propertyPath.in(getValueConverter().convert(propertyType, getValues()));
+        Expression<?> criteriaExpression = buildCriteriaExpression(root, criteriaBuilder);
+        Class<?> propertyType = criteriaExpression.getJavaType();
+        return criteriaExpression.in(getValueConverter().convert(propertyType, getValues()));
     }
 
 }

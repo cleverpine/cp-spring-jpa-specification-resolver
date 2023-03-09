@@ -1,5 +1,7 @@
 package com.cleverpine.specification.util;
 
+import com.cleverpine.specification.expression.PathSpecificationExpression;
+import com.cleverpine.specification.expression.SpecificationExpression;
 import com.cleverpine.specification.item.JoinItem;
 import org.junit.jupiter.api.Test;
 
@@ -12,15 +14,15 @@ public class QueryContextTest {
     @Test
     void constructor_shouldNotRequireDistinctEntityByDefault() {
         SpecificationQueryConfig<Object> queryConfig = SpecificationQueryConfig.builder().build();
-        QueryContext<Object> queryContext = new QueryContext<>(queryConfig.getJoinConfig(), queryConfig.getAttributePathConfig());
+        QueryContext<Object> queryContext = new QueryContext<>(queryConfig);
         assertFalse(queryContext.isEntityDistinctRequired());
     }
 
     @Test
     void getPathToEntityField_whenAttributeIsNotPresent_shouldReturnNull() {
         SpecificationQueryConfig<Object> queryConfig = SpecificationQueryConfig.builder().build();
-        QueryContext<Object> queryContext = new QueryContext<>(queryConfig.getJoinConfig(), queryConfig.getAttributePathConfig());
-        String actual = queryContext.getPathToEntityField("invalid");
+        QueryContext<Object> queryContext = new QueryContext<>(queryConfig);
+        String actual = queryContext.getPathToEntityAttribute("invalid");
         assertNull(actual);
     }
 
@@ -34,15 +36,15 @@ public class QueryContextTest {
                     .end()
                 .build();
 
-        QueryContext<Object> queryContext = new QueryContext<>(queryConfig.getJoinConfig(), queryConfig.getAttributePathConfig());
+        QueryContext<Object> queryContext = new QueryContext<>(queryConfig);
 
-        String actual = queryContext.getPathToEntityField(attribute);
+        String actual = queryContext.getPathToEntityAttribute(attribute);
         assertEquals(expectedPath, actual);
     }
     @Test
     void getJoinItemByAlias_whenAliasIsNotPresent_shouldReturnNull() {
         SpecificationQueryConfig<Object> queryConfig = SpecificationQueryConfig.builder().build();
-        QueryContext<Object> queryContext = new QueryContext<>(queryConfig.getJoinConfig(), queryConfig.getAttributePathConfig());
+        QueryContext<Object> queryContext = new QueryContext<>(queryConfig);
         JoinItem actual = queryContext.getJoinItemByAlias("invalid alias");
         assertNull(actual);
     }
@@ -57,7 +59,7 @@ public class QueryContextTest {
                     .defineJoinClause(Class.class, "genre", "g", JoinType.INNER)
                     .end()
                 .build();
-        QueryContext<Object> queryContext = new QueryContext<>(queryConfig.getJoinConfig(), queryConfig.getAttributePathConfig());
+        QueryContext<Object> queryContext = new QueryContext<>(queryConfig);
 
         JoinItem actual = queryContext.getJoinItemByAlias(alias);
         assertEquals(expectedJoinItem.getFromEntity(), actual.getFromEntity());
@@ -70,7 +72,7 @@ public class QueryContextTest {
     void clearState_shouldClearTheQueryJoins() {
         String alias = "g";
         SpecificationQueryConfig<Object> queryConfig = SpecificationQueryConfig.builder().build();
-        QueryContext<Object> queryContext = new QueryContext<>(queryConfig.getJoinConfig(), queryConfig.getAttributePathConfig());
+        QueryContext<Object> queryContext = new QueryContext<>(queryConfig);
         queryContext.addJoin(alias, null);
 
         assertTrue(queryContext.isJoinPresent(alias));
@@ -81,12 +83,38 @@ public class QueryContextTest {
     @Test
     void clearState_shouldClearTheRequiredDistinct() {
         SpecificationQueryConfig<Object> queryConfig = SpecificationQueryConfig.builder().build();
-        QueryContext<Object> queryContext = new QueryContext<>(queryConfig.getJoinConfig(), queryConfig.getAttributePathConfig());
+        QueryContext<Object> queryContext = new QueryContext<>(queryConfig);
         queryContext.setEntityDistinctRequired(true);
 
         assertTrue(queryContext.isEntityDistinctRequired());
         queryContext.clearState();
         assertFalse(queryContext.isEntityDistinctRequired());
+    }
+
+    @Test
+    void getCustomSpecificationExpressionByAttribute_whenACustomExpressionIsNotFoundForTheAttribute_shouldReturnNull() {
+        SpecificationQueryConfig<Object> queryConfig = SpecificationQueryConfig.builder()
+                .customExpressionConfig()
+                .addCustomSpecificationExpression("attribute", PathSpecificationExpression.class)
+                .end()
+                .build();
+        QueryContext<Object> queryContext = new QueryContext<>(queryConfig);
+
+        Class<? extends SpecificationExpression> actual = queryContext.getCustomSpecificationExpressionByAttribute("not-found-attribute");
+        assertNull(actual);
+    }
+
+    @Test
+    void getCustomSpecificationExpressionByAttribute_whenACustomExpressionIsPresentForTheAttribute_shouldReturnTheExpressionType() {
+        SpecificationQueryConfig<Object> queryConfig = SpecificationQueryConfig.builder()
+                .customExpressionConfig()
+                .addCustomSpecificationExpression("attribute", PathSpecificationExpression.class)
+                .end()
+                .build();
+        QueryContext<Object> queryContext = new QueryContext<>(queryConfig);
+
+        Class<? extends SpecificationExpression> actual = queryContext.getCustomSpecificationExpressionByAttribute("attribute");
+        assertEquals(PathSpecificationExpression.class, actual);
     }
 
 }

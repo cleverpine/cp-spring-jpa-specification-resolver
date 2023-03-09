@@ -1,7 +1,8 @@
 package com.cleverpine.specification.exception;
 
 /**
- * Thrown to indicate an illegal specification encounter error.
+ * Thrown to indicate an illegal specification error.
+ * It is used mostly for configuration errors.
  */
 public class IllegalSpecificationException extends RuntimeException {
 

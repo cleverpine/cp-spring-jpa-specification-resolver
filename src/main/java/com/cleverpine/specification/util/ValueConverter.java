@@ -12,10 +12,19 @@ import java.util.stream.Collectors;
 import static com.cleverpine.specification.util.FilterConstants.INVALID_VALUE_FOR_CLASS;
 import static com.cleverpine.specification.util.FilterConstants.NULL_VALUE;
 
+/**
+ * The {@link ValueConverter} class provides functionality to convert string values to
+ * their corresponding object types. It supports conversion to various types
+ * such as Integer, Long, Double, Float, BigDecimal, UUID and ZonedDateTime.
+ * Custom value converters can also be added to support additional types.
+ */
 public class ValueConverter {
 
     private final Map<Class<?>, Function<String, Object>> valueParsers = new HashMap<>();
 
+    /**
+     * Constructor that initializes the valueParsers map with parsers for the supported object types.
+     */
     public ValueConverter() {
         valueParsers.put(Integer.class, this::parseToInt);
         valueParsers.put(int.class, this::parseToInt);
@@ -30,6 +39,13 @@ public class ValueConverter {
         valueParsers.put(ZonedDateTime.class, this::parseToZonedDateTime);
     }
 
+    /**
+     * Converts a string value to the corresponding object type.
+     * @param type the class of the desired object type
+     * @param value the string value to convert
+     * @return the converted object
+     * @throws InvalidSpecificationException if the value is null or cannot be converted to the specified type
+     */
     public Object convert(Class<?> type, String value) {
         if (Objects.isNull(value)) {
             throw new InvalidSpecificationException(NULL_VALUE);
@@ -41,6 +57,13 @@ public class ValueConverter {
         return parseFunction.apply(value);
     }
 
+    /**
+     * Converts a string value to a comparable object of the specified type.
+     * @param type the class of the desired comparable object type
+     * @param value the string value to convert
+     * @return the converted comparable object
+     * @throws InvalidSpecificationException if the value cannot be converted to the specified type or the specified type is not comparable
+     */
     @SuppressWarnings("unchecked")
     public Comparable<Object> convertToComparable(Class<?> type, String value) {
         if (!Comparable.class.isAssignableFrom(type)) {
@@ -51,12 +74,22 @@ public class ValueConverter {
         return (Comparable<Object>) convertedValue;
     }
 
+    /**
+     * Converts a list of string values to a list of objects of the specified type.
+     * @param type the class of the desired object type
+     * @param values the list of string values to convert
+     * @return the list of converted objects
+     */
     public List<Object> convert(Class<?> type, List<String> values) {
         return values.stream()
                 .map(value -> this.convert(type, value))
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Adds custom defined value converters that can be used later when a specification is built.
+     * @param converterMap holding the value converter function by its data type.
+     */
     public void addCustomValueConverters(Map<Class<?>, Function<String, Object>> converterMap) {
         valueParsers.putAll(converterMap);
     }

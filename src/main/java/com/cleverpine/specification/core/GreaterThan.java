@@ -17,13 +17,13 @@ public class GreaterThan<T> extends SingleValueSpecification<T> {
     /**
      * Constructs an instance of the {@link GreaterThan} specification with the given path, value, query context, and value converter.
      *
-     * @param path the path of the property to filter on
+     * @param attributePath the path of the property to filter on
      * @param value the value to filter by
      * @param queryContext the query context to use for the specification that
      * @param valueConverter the value converter to use for converting values to the appropriate types
      */
-    public GreaterThan(String path, String value, QueryContext<T> queryContext, ValueConverter valueConverter) {
-        super(path, value, queryContext, valueConverter);
+    public GreaterThan(String attributePath, String value, QueryContext<T> queryContext, ValueConverter valueConverter) {
+        super(attributePath, value, queryContext, valueConverter);
     }
 
     /**
@@ -37,9 +37,9 @@ public class GreaterThan<T> extends SingleValueSpecification<T> {
      */
     @Override
     public Predicate toPredicate(Root<T> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
-        Path<? extends Comparable<Object>> propertyPath = buildJoinPathToAttribute(root);
-        Class<? extends Comparable<Object>> propertyType = propertyPath.getJavaType();
-        return criteriaBuilder.greaterThan(propertyPath, getValueConverter().convertToComparable(propertyType, getValue()));
+        Expression<? extends Comparable<Object>> criteriaExpression = buildCriteriaExpression(root, criteriaBuilder);
+        Class<? extends Comparable<Object>> propertyType = criteriaExpression.getJavaType();
+        return criteriaBuilder.greaterThan(criteriaExpression, getValueConverter().convertToComparable(propertyType, getValue()));
     }
 
 }

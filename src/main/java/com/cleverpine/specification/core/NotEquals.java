@@ -17,13 +17,13 @@ public class NotEquals<T> extends SingleValueSpecification<T> {
     /**
      * Constructs an instance of the {@link NotEquals} specification with the given path, value, query context, and value converter.
      *
-     * @param path the path of the property to filter on
+     * @param attributePath the path of the property to filter on
      * @param value the value to filter by
      * @param queryContext the query context to use for the specification that
      * @param valueConverter the value converter to use for converting values to the appropriate types
      */
-    public NotEquals(String path, String value, QueryContext<T> queryContext, ValueConverter valueConverter) {
-        super(path, value, queryContext, valueConverter);
+    public NotEquals(String attributePath, String value, QueryContext<T> queryContext, ValueConverter valueConverter) {
+        super(attributePath, value, queryContext, valueConverter);
     }
 
     /**
@@ -37,9 +37,9 @@ public class NotEquals<T> extends SingleValueSpecification<T> {
      */
     @Override
     public Predicate toPredicate(Root<T> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
-        Path<Object> propertyPath = buildJoinPathToAttribute(root);
-        Class<?> propertyType = propertyPath.getJavaType();
-        return criteriaBuilder.notEqual(propertyPath, getValueConverter().convert(propertyType, getValue()));
+        Expression<?> criteriaExpression = buildCriteriaExpression(root, criteriaBuilder);
+        Class<?> propertyType = criteriaExpression.getJavaType();
+        return criteriaBuilder.notEqual(criteriaExpression, getValueConverter().convert(propertyType, getValue()));
     }
 
 }

@@ -9,7 +9,6 @@ import org.springframework.data.jpa.domain.Specification;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
-import java.util.Objects;
 
 import static com.cleverpine.specification.util.FilterConstants.INVALID_SPECIFICATION_CREATION;
 
@@ -43,15 +42,13 @@ public class MultiFilterItem<T> extends FilterItem<T> {
      * @throws IllegalSpecificationException if the specification cannot be created
      */
     @Override
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public Specification<T> createSpecification(QueryContext<T> queryContext, ValueConverter valueConverter) {
-        String filterPath = queryContext.getPathToEntityField(getAttribute());
-        String path = Objects.nonNull(filterPath) ? filterPath : getAttribute();
         Class<? extends Specification> specificationType = getOperator().getSpecificationType();
         try {
             return (Specification<T>) specificationType
                     .getDeclaredConstructor(String.class, List.class, QueryContext.class, ValueConverter.class)
-                    .newInstance(path, values, queryContext, valueConverter);
+                    .newInstance(getAttribute(), values, queryContext, valueConverter);
         } catch (InstantiationException | NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
             throw new IllegalSpecificationException(
                     String.format(INVALID_SPECIFICATION_CREATION, specificationType.getSimpleName()));

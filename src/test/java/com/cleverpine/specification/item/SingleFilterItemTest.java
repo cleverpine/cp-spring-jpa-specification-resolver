@@ -63,7 +63,7 @@ public class SingleFilterItemTest {
                 new SingleFilterItem<>(ATTRIBUTE, FilterOperator.IN, VALUE);
 
         SpecificationQueryConfig<Object> queryConfig = SpecificationQueryConfig.builder().build();
-        QueryContext<Object> queryContext = new QueryContext<>(queryConfig.getJoinConfig(), queryConfig.getAttributePathConfig());
+        QueryContext<Object> queryContext = new QueryContext<>(queryConfig);
 
         assertThrows(
                 IllegalSpecificationException.class,
@@ -77,7 +77,7 @@ public class SingleFilterItemTest {
                 new SingleFilterItem<>(ATTRIBUTE, FilterOperator.GREATER_THAN, VALUE);
 
         SpecificationQueryConfig<Object> queryConfig = SpecificationQueryConfig.builder().build();
-        QueryContext<Object> queryContext = new QueryContext<>(queryConfig.getJoinConfig(), queryConfig.getAttributePathConfig());
+        QueryContext<Object> queryContext = new QueryContext<>(queryConfig);
 
         Specification<Object> specification =
                 greaterThanFilterItem.createSpecification(queryContext, valueConverter);
@@ -91,35 +91,13 @@ public class SingleFilterItemTest {
                 new SingleFilterItem<>(ATTRIBUTE, FilterOperator.GREATER_THAN, VALUE);
 
         SpecificationQueryConfig<Object> queryConfig = SpecificationQueryConfig.builder().build();
-        QueryContext<Object> queryContext = new QueryContext<>(queryConfig.getJoinConfig(), queryConfig.getAttributePathConfig());
+        QueryContext<Object> queryContext = new QueryContext<>(queryConfig);
 
         GreaterThan<Object> specification =
                 (GreaterThan<Object>) greaterThanFilterItem
                         .createSpecification(queryContext, valueConverter);
 
-        assertEquals(ATTRIBUTE, specification.getPath());
-    }
-
-    @Test
-    void createSpecification_whenPathToEntityAttributeIsPresent_shouldOverrideTheAttributeFromTheFilterItemAsPath() {
-        SingleFilterItem<Object> greaterThanFilterItem =
-                new SingleFilterItem<>(ATTRIBUTE, FilterOperator.GREATER_THAN, VALUE);
-
-        String expectedPath = "first.second";
-
-        SpecificationQueryConfig<Object> queryConfig = SpecificationQueryConfig.builder()
-                .attributePathConfig()
-                    .addAttributePathMapping(ATTRIBUTE, expectedPath)
-                    .end()
-                .build();
-
-        QueryContext<Object> queryContext = new QueryContext<>(queryConfig.getJoinConfig(), queryConfig.getAttributePathConfig());
-
-        GreaterThan<Object> specification =
-                (GreaterThan<Object>) greaterThanFilterItem
-                        .createSpecification(queryContext, valueConverter);
-
-        assertEquals(expectedPath, specification.getPath());
+        assertEquals(ATTRIBUTE, specification.getAttributePath());
     }
 
 }

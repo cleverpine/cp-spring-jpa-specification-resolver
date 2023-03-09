@@ -6,23 +6,23 @@ import com.cleverpine.specification.util.SortDirection;
 import javax.persistence.criteria.*;
 
 /**
- * A Specification for an order by clause in a JPA query (sorting by a certain property). This specification extends the {@link PathSpecification} class.
+ * A Specification for an order by clause in a JPA query (sorting by a certain property). This specification extends the {@link CriteriaExpressionSpecification} class.
  *
  * @param <T> the type of the root entity
  */
-public class OrderBySpecification<T> extends PathSpecification<T> {
+public class OrderBySpecification<T> extends CriteriaExpressionSpecification<T> {
 
     private final SortDirection sortDirection;
 
     /**
      * Constructs an order by specification with the given path, query context, and sort direction.
      *
-     * @param path the path to the attribute being ordered by
+     * @param attributePath the path to the attribute being ordered by
      * @param queryContext the query context
      * @param sortDirection the sort direction
      */
-    public OrderBySpecification(String path, QueryContext<T> queryContext, SortDirection sortDirection) {
-        super(path, queryContext);
+    public OrderBySpecification(String attributePath, QueryContext<T> queryContext, SortDirection sortDirection) {
+        super(attributePath, queryContext);
         this.sortDirection = sortDirection;
     }
 
@@ -37,19 +37,17 @@ public class OrderBySpecification<T> extends PathSpecification<T> {
      */
     @Override
     public Predicate toPredicate(Root<T> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
-        Path<?> propertyPath = getQueryContext().isEntityDistinctRequired()
-                ? buildFetchPathToAttribute(root)
-                : buildJoinPathToAttribute(root);
-        Order orderClause = createOrderClause(criteriaBuilder, propertyPath);
+        Expression<?> criteriaExpression = buildCriteriaExpression(root, criteriaBuilder);
+        Order orderClause = createOrderClause(criteriaBuilder, criteriaExpression);
         query.orderBy(orderClause);
         return null;
     }
 
-    private Order createOrderClause(CriteriaBuilder criteriaBuilder, Path<?> path) {
+    private Order createOrderClause(CriteriaBuilder criteriaBuilder, Expression<?> criteriaExpression) {
         if (sortDirection.isAscending()) {
-            return criteriaBuilder.asc(path);
+            return criteriaBuilder.asc(criteriaExpression);
         }
-        return criteriaBuilder.desc(path);
+        return criteriaBuilder.desc(criteriaExpression);
     }
 
 }

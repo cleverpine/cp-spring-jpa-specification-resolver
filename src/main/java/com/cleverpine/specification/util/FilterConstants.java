@@ -8,17 +8,17 @@ public final class FilterConstants {
     }
 
     // Operators
-    public static final String EQUAL_OPERATOR = "=";
+    public static final String EQUAL_OPERATOR = "eq";
 
-    public static final String NOT_EQUAL_OPERATOR = "!=";
+    public static final String NOT_EQUAL_OPERATOR = "neq";
 
-    public static final String GREATER_THAN_OPERATOR = ">";
+    public static final String GREATER_THAN_OPERATOR = "gt";
 
-    public static final String LESS_THAN_OPERATOR = "<";
+    public static final String LESS_THAN_OPERATOR = "lt";
 
-    public static final String GREATER_THAN_EQUAL_OPERATOR = ">=";
+    public static final String GREATER_THAN_EQUAL_OPERATOR = "gte";
 
-    public static final String LESS_THAN_EQUAL_OPERATOR = "<=";
+    public static final String LESS_THAN_EQUAL_OPERATOR = "lte";
 
     public static final String LIKE_OPERATOR = "like";
 
@@ -46,6 +46,8 @@ public final class FilterConstants {
 
     public static final String INVALID_SPECIFICATION_CREATION = "Specification [%s] cannot be instantiated";
 
+    public static final String INVALID_EXPRESSION_CREATION = "Expression [%s] cannot be instantiated";
+
     public static final String INVALID_VALUES_COUNT = "[%s] filter item should have [%d] parameters";
 
     public static final String JOIN_NOT_DEFINED = "Join with alias [%s] is not defined";
@@ -54,8 +56,13 @@ public final class FilterConstants {
 
     public static final String NULL_VALUE = "This value cannot be converted, because it is null";
 
-    public static final String ATTRIBUTE_SEPARATOR = ".";
+    public static final String ENTITY_ATTRIBUTE_SEPARATOR = ".";
 
     public static final String EMPTY_STRING = "";
 
+    public static final String PARSER_NOT_PROVIDED = "The filter/sort parameter is provided, but a parser is not found";
+
+    public static final Integer VALID_FILTER_ARGS_COUNT = 3;
+
+    public static final Integer VALID_SORT_ARGS_COUNT = 2;
 }

@@ -1,11 +1,11 @@
-package com.cleverpine.specification.core;
+package com.cleverpine.specification.expression;
 
 import com.cleverpine.specification.exception.IllegalSpecificationException;
 import com.cleverpine.specification.item.JoinItem;
 import com.cleverpine.specification.util.QueryContext;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.jpa.domain.Specification;
 
 import javax.persistence.criteria.*;
 import java.util.ArrayDeque;
@@ -16,36 +16,55 @@ import java.util.Objects;
 import static com.cleverpine.specification.util.FilterConstants.*;
 
 /**
- * A base class for specifications that involve a path to an attribute in the target entity {@link T}.
- * It implements the {@link org.springframework.data.jpa.domain.Specification} interface and provides methods for building
- * the path to the attribute, either as a join or a fetch join, depending on the value of the {@link QueryContext#isEntityDistinctRequired()}.
- * This class is meant to be extended by concrete implementation of a specification that use the path to an attribute in various ways, such as for
- * filtering, sorting, or grouping.
+ * The SpecificationExpression class is an abstract class that serves as the base class for all specification
+ * expressions. It provides a common interface for producing JPA expressions, and contains methods for building path
+ * expressions to entity attributes.
  *
- * @param <T>
+ * @param <T> the type of entity being queried
+ * @param <G> the type of attribute being queried
  */
 @RequiredArgsConstructor
-@Getter
-public abstract class PathSpecification<T> implements Specification<T> {
+@Getter(value = AccessLevel.PROTECTED)
+public abstract class SpecificationExpression<T, G> {
 
-    private final String path;
+    protected final String attributePath;
 
-    private final QueryContext<T> queryContext;
+    protected final QueryContext<T> queryContext;
+
+    /**
+     * Produce the JPA expression from the provided root and criteria builder.
+     *
+     * @param root            the root object of the entity
+     * @param criteriaBuilder the builder for creating Criteria Query objects
+     * @return the JPA expression
+     */
+    public abstract Expression<G> produceExpression(Root<T> root, CriteriaBuilder criteriaBuilder);
+
+    /**
+     * Builds a JPA path expression to the entity attribute by building a join or fetch path/s from the root.
+     *
+     * @param entityAttributePath the full path to the entity attribute
+     * @param root                the root object of the query
+     * @return the path expression to the entity attribute
+     */
+    protected Path<G> buildPathExpressionToEntityAttribute(String entityAttributePath, Root<T> root) {
+        return queryContext.isEntityDistinctRequired()
+                ? buildFetchPathToAttribute(root, entityAttributePath)
+                : buildJoinPathToAttribute(root, entityAttributePath);
+    }
 
     /**
      * Builds a join path to the attribute in the entity, starting from the root. It splits the attribute's path.
      *
      * @param root the root object of the query
-     * @param <G> the type of the attribute
-     *
      * @return the join path to the attribute
      */
-    protected <G> Path<G> buildJoinPathToAttribute(Root<T> root) {
-        if (isSingleAttributePath()) {
+    private Path<G> buildJoinPathToAttribute(Root<T> root, String path) {
+        if (isSingleAttributePath(path)) {
             return root.get(path);
         }
 
-        String[] attributePathTokens = path.split("\\" + ATTRIBUTE_SEPARATOR);
+        String[] attributePathTokens = path.split("\\" + ENTITY_ATTRIBUTE_SEPARATOR);
         Deque<String> joinPathAliasesQueue = getJoinPathAliases(attributePathTokens);
 
         From<?, ?> joinPath = root;
@@ -62,16 +81,14 @@ public abstract class PathSpecification<T> implements Specification<T> {
      * Builds a fetch path to the attribute in the entity, starting from the root. It splits the attribute's path.
      *
      * @param root the root object of the query
-     * @param <G> the type of the attribute
-     *
      * @return the fetch path to the attribute
      */
-    protected <G> Path<G> buildFetchPathToAttribute(Root<T> root) {
-        if (isSingleAttributePath()) {
+    private Path<G> buildFetchPathToAttribute(Root<T> root, String path) {
+        if (isSingleAttributePath(path)) {
             return root.get(path);
         }
 
-        String[] attributePathTokens = path.split("\\" + ATTRIBUTE_SEPARATOR);
+        String[] attributePathTokens = path.split("\\" + ENTITY_ATTRIBUTE_SEPARATOR);
         Deque<String> joinPathAliasesQueue = getJoinPathAliases(attributePathTokens);
 
         From<?, ?> joinPath = root;
@@ -82,10 +99,6 @@ public abstract class PathSpecification<T> implements Specification<T> {
 
         String attribute = attributePathTokens[attributePathTokens.length - 1];
         return joinPath.get(attribute);
-    }
-
-    private boolean isSingleAttributePath() {
-        return !path.contains(ATTRIBUTE_SEPARATOR);
     }
 
     /**
@@ -137,4 +150,7 @@ public abstract class PathSpecification<T> implements Specification<T> {
         }
     }
 
+    private boolean isSingleAttributePath(String path) {
+        return !path.contains(ENTITY_ATTRIBUTE_SEPARATOR);
+    }
 }

@@ -1,5 +1,6 @@
 package com.cleverpine.specification.util;
 
+import com.cleverpine.specification.expression.SpecificationExpression;
 import com.cleverpine.specification.item.*;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -11,6 +12,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * This class represents a configuration object for creating a JPA specification query.
+ * The {@link SpecificationQueryConfig} object contains various nested objects that define how to build
+ * the JPA specification query.
+ *
+ * @param <T> The entity type to which the JPA specification query is applied.
+ */
 @RequiredArgsConstructor
 @Getter
 public class SpecificationQueryConfig<T> {
@@ -22,6 +30,8 @@ public class SpecificationQueryConfig<T> {
     private final FilterConfig<T> filterConfig;
 
     private final OrderByConfig<T> orderByConfig;
+
+    private final CustomExpressionConfig<T> customExpressionConfig;
 
     private final boolean entityDistinctRequired;
 
@@ -38,6 +48,8 @@ public class SpecificationQueryConfig<T> {
         private final FilterConfig<T> filterConfig = new FilterConfig<>(this);
 
         private final OrderByConfig<T> orderByConfig = new OrderByConfig<>(this);
+
+        private final CustomExpressionConfig<T> customExpressionConfig = new CustomExpressionConfig<>(this);
 
         private boolean entityDistinctRequired;
 
@@ -57,13 +69,17 @@ public class SpecificationQueryConfig<T> {
             return orderByConfig;
         }
 
+        public CustomExpressionConfig<T> customExpressionConfig() {
+            return customExpressionConfig;
+        }
+
         public SpecificationQueryConfigBuilder<T> entityDistinctRequired(boolean entityDistinctRequired) {
             this.entityDistinctRequired = entityDistinctRequired;
             return this;
         }
 
         public SpecificationQueryConfig<T> build() {
-            return new SpecificationQueryConfig<>(joinConfig, attributePathConfig, filterConfig, orderByConfig, entityDistinctRequired);
+            return new SpecificationQueryConfig<>(joinConfig, attributePathConfig, filterConfig, orderByConfig, customExpressionConfig, entityDistinctRequired);
         }
     }
 
@@ -168,6 +184,31 @@ public class SpecificationQueryConfig<T> {
         public OrderByConfig<T> addOrderBy(String attribute, SortDirection direction) {
             OrderByItem<T> orderItem = new OrderByItem<>(attribute, direction);
             orderItems.add(orderItem);
+            return this;
+        }
+
+        public SpecificationQueryConfigBuilder<T> end() {
+            return specificationQueryConfigBuilder;
+        }
+    }
+
+    @SuppressWarnings("rawtypes")
+    public static class CustomExpressionConfig<T> {
+
+        private final SpecificationQueryConfigBuilder<T> specificationQueryConfigBuilder;
+
+        private final Map<String, Class<? extends SpecificationExpression>> customSpecExpressionsByAttribute = new HashMap<>();
+
+        private CustomExpressionConfig(SpecificationQueryConfigBuilder<T> specificationQueryConfigBuilder) {
+            this.specificationQueryConfigBuilder = specificationQueryConfigBuilder;
+        }
+
+        public Class<? extends SpecificationExpression> getCustomSpecificationExpressionByAttribute(String attribute) {
+            return customSpecExpressionsByAttribute.get(attribute);
+        }
+
+        public CustomExpressionConfig<T> addCustomSpecificationExpression(String attribute, Class<? extends SpecificationExpression> specificationExpressionType) {
+            customSpecExpressionsByAttribute.put(attribute, specificationExpressionType);
             return this;
         }
 

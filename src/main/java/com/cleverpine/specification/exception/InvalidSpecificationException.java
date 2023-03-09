@@ -1,7 +1,8 @@
 package com.cleverpine.specification.exception;
 
 /**
- * Thrown to indicate an invalid specification encounter error.
+ * Thrown to indicate an invalid specification error.
+ * It is used mostly for invalid data errors.
  */
 public class InvalidSpecificationException extends RuntimeException {
 

@@ -5,10 +5,9 @@ import com.cleverpine.specification.core.OrderBySpecification;
 import com.cleverpine.specification.util.QueryContext;
 import com.cleverpine.specification.util.SortDirection;
 import lombok.Getter;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.jpa.domain.Specification;
-
-import java.util.Objects;
 
 /**
  * Represents a sorting item used in a query to sort results based on a given attribute and sort direction.
@@ -18,8 +17,10 @@ import java.util.Objects;
 @Getter
 public class OrderByItem<T> {
 
+    @NonNull
     private final String attribute;
 
+    @NonNull
     private final SortDirection direction;
 
     /**
@@ -27,9 +28,7 @@ public class OrderByItem<T> {
      * @param queryContext the context of the query being performed
      * @return an {@link OrderBySpecification} for the attribute and sort direction of this order-by item
      */
-    public Specification<T> createSpecification(QueryContext<T> queryContext) {
-        String fieldFullPath = queryContext.getPathToEntityField(getAttribute());
-        String path = Objects.nonNull(fieldFullPath) ? fieldFullPath : getAttribute();
-        return new OrderBySpecification<>(path, queryContext, direction);
+    public Specification<T> createSpecification(@NonNull QueryContext<T> queryContext) {
+        return new OrderBySpecification<>(getAttribute(), queryContext, direction);
     }
 }
