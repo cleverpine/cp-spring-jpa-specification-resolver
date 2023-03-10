@@ -22,15 +22,16 @@ steps:
     inputs:
       secureFile: 'settings.xml'
 
-  - script: |
-      mvn --version
-      env
-      cp $(settings.secureFilePath) /usr/share/apache-maven-3.8.7/conf/settings.xml
+  # - script: |
+  #     mvn --version
+  #     env
+  #     cp $(settings.secureFilePath) /usr/share/apache-maven-3.8.7/conf/settings.xml
 
   - task: Maven@3
     inputs:
       mavenPomFile: 'pom.xml'
       goals: 'clean deploy'
+      options: '--settings $(settings.secureFilePath)'
       publishJUnitResults: false
       javaHomeOption: 'JDKVersion'
       mavenVersionOption: 'Default'
