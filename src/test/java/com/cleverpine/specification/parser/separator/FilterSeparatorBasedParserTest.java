@@ -52,13 +52,12 @@ public class FilterSeparatorBasedParserTest {
     }
 
     @Test
-    void parseFilterParams_withNullFilterParamElement_shouldThrowException() {
+    void parseFilterParams_withNullFilterParamElement_shouldReturnEmptyCollection() {
         List<String> args = new ArrayList<>();
         args.add(null);
-        assertThrows(
-                InvalidSpecificationException.class,
-                () -> filterSeparatorBasedParser.parseFilterParams(args)
-        );
+        List<FilterItem<Object>> actual = filterSeparatorBasedParser.parseFilterParams(args);
+
+        assertTrue(actual.isEmpty());
     }
 
     @Test

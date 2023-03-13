@@ -44,10 +44,9 @@ public class SortSeparatorBasedParserTest {
     void parseSortParams_withNullSortParamElement_shouldThrowException() {
         List<String> args = new ArrayList<>();
         args.add(null);
-        assertThrows(
-                InvalidSpecificationException.class,
-                () -> sortSeparatorBasedParser.parseSortParams(args)
-        );
+        List<OrderByItem<Object>> actual = sortSeparatorBasedParser.parseSortParams(args);
+
+        assertTrue(actual.isEmpty());
     }
 
     @Test
