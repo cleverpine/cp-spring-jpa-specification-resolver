@@ -6,6 +6,7 @@ import com.cleverpine.specification.parser.MultipleSortParser;
 import com.cleverpine.specification.util.SpecificationUtil;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -39,6 +40,7 @@ public class SortSeparatorBasedParser implements MultipleSortParser {
             return new ArrayList<>();
         }
         return sortParams.stream()
+                .filter(StringUtils::hasLength)
                 .map(this::<T>createSortItem)
                 .collect(Collectors.toList());
     }

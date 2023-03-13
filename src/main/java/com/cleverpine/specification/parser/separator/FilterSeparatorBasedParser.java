@@ -8,6 +8,7 @@ import com.cleverpine.specification.parser.MultipleFilterParser;
 import com.cleverpine.specification.util.SpecificationUtil;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -44,6 +45,7 @@ public class FilterSeparatorBasedParser implements MultipleFilterParser {
             return new ArrayList<>();
         }
         return filterParams.stream()
+                .filter(StringUtils::hasLength)
                 .map(this::<T>createFilterItem)
                 .collect(Collectors.toList());
     }
