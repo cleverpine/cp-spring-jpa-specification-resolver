@@ -8,20 +8,35 @@ import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
+/**
+ * The {@link EndsWith} class represents a single-value specification that checks whether a given property ends with a
+ * specific value. It extends the {@link SingleValueSpecification} abstract class, which means it can handle only one value
+ * and implements the {@link #toPredicate(Root, CriteriaQuery, CriteriaBuilder)} method to generate a predicate for the criteria API.
+ *
+ * @param <T> the type of the root entity
+ */
 public class EndsWith<T> extends SingleValueSpecification<T> {
 
     /**
-     * Constructor for a SingleValueSpecification.
+     * Constructs an instance of the {@link Equals} specification with the given path, value, query context, and value converter.
      *
-     * @param attributePath  the path for the specification
-     * @param value          the value for the specification
-     * @param queryContext   the query context for the specification
-     * @param valueConverter the value converter for the specification
+     * @param attributePath  the path of the property to filter on
+     * @param value          the value to filter by
+     * @param queryContext   the query context to use for the specification that
+     * @param valueConverter the value converter to use for converting values to the appropriate types
      */
     public EndsWith(String attributePath, String value, QueryContext<T> queryContext, ValueConverter valueConverter) {
         super(attributePath, value, queryContext, valueConverter);
     }
 
+    /**
+     * Converts this specification into a JPA criteria API predicate.
+     *
+     * @param root            the root entity
+     * @param query           the query to which the predicate is added
+     * @param criteriaBuilder the builder to use for constructing the predicate
+     * @return a predicate that corresponds to this specification
+     */
     @Override
     public Predicate toPredicate(Root<T> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
         Expression<String> criteriaExpression = buildCriteriaExpression(root, criteriaBuilder);
