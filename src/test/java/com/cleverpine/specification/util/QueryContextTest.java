@@ -3,11 +3,14 @@ package com.cleverpine.specification.util;
 import com.cleverpine.specification.expression.PathSpecificationExpression;
 import com.cleverpine.specification.expression.SpecificationExpression;
 import com.cleverpine.specification.item.JoinItem;
+import jakarta.persistence.criteria.JoinType;
 import org.junit.jupiter.api.Test;
 
-import javax.persistence.criteria.JoinType;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class QueryContextTest {
 
@@ -32,8 +35,8 @@ public class QueryContextTest {
         String expectedPath = "genre";
         SpecificationQueryConfig<Object> queryConfig = SpecificationQueryConfig.builder()
                 .attributePathConfig()
-                    .addAttributePathMapping(attribute, expectedPath)
-                    .end()
+                .addAttributePathMapping(attribute, expectedPath)
+                .end()
                 .build();
 
         QueryContext<Object> queryContext = new QueryContext<>(queryConfig);
@@ -41,6 +44,7 @@ public class QueryContextTest {
         String actual = queryContext.getPathToEntityAttribute(attribute);
         assertEquals(expectedPath, actual);
     }
+
     @Test
     void getJoinItemByAlias_whenAliasIsNotPresent_shouldReturnNull() {
         SpecificationQueryConfig<Object> queryConfig = SpecificationQueryConfig.builder().build();
@@ -56,8 +60,8 @@ public class QueryContextTest {
 
         SpecificationQueryConfig<Object> queryConfig = SpecificationQueryConfig.builder()
                 .joinConfig()
-                    .defineJoinClause(Class.class, "genre", "g", JoinType.INNER)
-                    .end()
+                .defineJoinClause(Class.class, "genre", "g", JoinType.INNER)
+                .end()
                 .build();
         QueryContext<Object> queryContext = new QueryContext<>(queryConfig);
 

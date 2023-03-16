@@ -19,11 +19,11 @@ import com.cleverpine.specification.util.SpecificationQueryConfig;
 import com.cleverpine.specification.util.SpecificationRequest;
 import com.cleverpine.specification.util.ValueConverter;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.persistence.criteria.JoinType;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-import javax.persistence.criteria.JoinType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.jpa.domain.Specification;
@@ -944,7 +944,7 @@ public class SpecificationProducerIT extends SpecificationProducerIntegrationTes
                 valueConverter);
 
         SpecificationRequest<Movie> specificationRequest = SpecificationRequest.<Movie>builder()
-                .withFilterItems(List.of(new SingleFilterItem<>("title", FilterOperator.ENDS_WITH, "Island")))
+                .withFilterItems(List.of(new SingleFilterItem<>("title", FilterOperator.ENDS_WITH, "Furious")))
                 .build();
 
         Specification<Movie> movieSpecification = specificationProducer.createSpecification(specificationRequest);
@@ -954,6 +954,6 @@ public class SpecificationProducerIT extends SpecificationProducerIntegrationTes
 
         Movie actualMovie = actual.get(0);
 
-        assertEquals("Shutter Island", actualMovie.getTitle());
+        assertEquals("Fast and Furious", actualMovie.getTitle());
     }
 }

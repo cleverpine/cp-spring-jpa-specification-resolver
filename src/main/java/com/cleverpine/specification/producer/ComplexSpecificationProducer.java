@@ -8,16 +8,15 @@ import com.cleverpine.specification.util.QueryContext;
 import com.cleverpine.specification.util.SpecificationQueryConfig;
 import com.cleverpine.specification.util.SpecificationRequest;
 import com.cleverpine.specification.util.ValueConverter;
-import org.springframework.data.jpa.domain.Specification;
-
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
+import org.springframework.data.jpa.domain.Specification;
 
 /**
  * This class {@link ComplexSpecificationProducer} is responsible for producing complex specifications that involve
@@ -56,8 +55,8 @@ public class ComplexSpecificationProducer<T> {
     private final SimpleSpecificationProducer simpleSpecificationProducer = new SimpleSpecificationProducer();
 
     public ComplexSpecificationProducer(SpecificationParserManager specificationParserManager,
-                                        Class<?> filterType,
-                                        ValueConverter valueConverter) {
+            Class<?> filterType,
+            ValueConverter valueConverter) {
         this(specificationParserManager, filterType, valueConverter, SpecificationQueryConfig.<T>builder().build());
     }
 
@@ -71,9 +70,9 @@ public class ComplexSpecificationProducer<T> {
      * @param specificationQueryConfig   the configuration used to create the query context
      */
     public ComplexSpecificationProducer(SpecificationParserManager specificationParserManager,
-                                        Class<?> filterType,
-                                        ValueConverter valueConverter,
-                                        SpecificationQueryConfig<T> specificationQueryConfig) {
+            Class<?> filterType,
+            ValueConverter valueConverter,
+            SpecificationQueryConfig<T> specificationQueryConfig) {
         this.specificationParserManager = specificationParserManager;
         this.filterType = filterType;
         this.valueConverter = valueConverter;
@@ -120,7 +119,7 @@ public class ComplexSpecificationProducer<T> {
                     .map(spec -> spec.toPredicate(root, query, criteriaBuilder))
                     .filter(Objects::nonNull)
                     .collect(Collectors.toList())
-                    .toArray(new Predicate[]{});
+                    .toArray(new Predicate[] {});
 
             return criteriaBuilder.and(predicates);
         };

@@ -2,11 +2,11 @@ package com.cleverpine.specification.core;
 
 import com.cleverpine.specification.util.QueryContext;
 import com.cleverpine.specification.util.ValueConverter;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Expression;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Expression;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
 
 /**
  * The {@link StartsWith} class represents a single-value specification that checks whether a given property starts with a

@@ -2,9 +2,8 @@ package com.cleverpine.specification.core;
 
 import com.cleverpine.specification.util.QueryContext;
 import com.cleverpine.specification.util.ValueConverter;
-
-import javax.persistence.criteria.*;
 import java.util.List;
+import jakarta.persistence.criteria.*;
 
 /**
  * The {@link In} class represents a multi-value specification that checks if a property is within a list of specified values.
@@ -18,9 +17,9 @@ public class In<T> extends MultiValueSpecification<T> {
     /**
      * Constructs a new specification with the given attribute path, values, query context, and value converter.
      *
-     * @param attributePath the path of the property to filter on
-     * @param values the list of values that the property's value must be within
-     * @param queryContext the query context to use for the specification that
+     * @param attributePath  the path of the property to filter on
+     * @param values         the list of values that the property's value must be within
+     * @param queryContext   the query context to use for the specification that
      * @param valueConverter the value converter to use for converting values to the appropriate types
      */
     public In(String attributePath, List<String> values, QueryContext<T> queryContext, ValueConverter valueConverter) {
@@ -30,10 +29,9 @@ public class In<T> extends MultiValueSpecification<T> {
     /**
      * Converts this specification into a JPA criteria API predicate.
      *
-     * @param root the root entity
-     * @param query the query to which the predicate is added
+     * @param root            the root entity
+     * @param query           the query to which the predicate is added
      * @param criteriaBuilder the builder to use for constructing the predicate
-     *
      * @return a predicate that corresponds to this specification
      */
     @Override

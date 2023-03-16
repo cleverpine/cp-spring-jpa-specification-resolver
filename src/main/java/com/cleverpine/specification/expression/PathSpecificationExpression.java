@@ -1,11 +1,10 @@
 package com.cleverpine.specification.expression;
 
 import com.cleverpine.specification.util.QueryContext;
-
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.Expression;
-import javax.persistence.criteria.Root;
 import java.util.Objects;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.Expression;
+import jakarta.persistence.criteria.Root;
 
 /**
  * This class represents a specification expression that specifies an attribute path from the root entity.
@@ -23,7 +22,7 @@ public class PathSpecificationExpression<T, G> extends SpecificationExpression<T
      * @param queryContext  the query context to use.
      */
     public PathSpecificationExpression(String attributePath,
-                                       QueryContext<T> queryContext) {
+            QueryContext<T> queryContext) {
         super(attributePath, queryContext);
     }
 
