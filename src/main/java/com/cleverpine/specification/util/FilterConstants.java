@@ -21,9 +21,9 @@ public final class FilterConstants {
 
     public static final String LIKE_OPERATOR = "like";
 
-    public static final String STARTS_WITH_OPERATOR = "startsWith";
+    public static final String STARTS_WITH_OPERATOR = "sw";
 
-    public static final String ENDS_WITH_OPERATOR = "endsWith";
+    public static final String ENDS_WITH_OPERATOR = "ew";
 
     public static final String IN_OPERATOR = "in";
 

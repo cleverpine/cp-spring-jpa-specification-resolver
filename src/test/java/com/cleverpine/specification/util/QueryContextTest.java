@@ -16,14 +16,18 @@ public class QueryContextTest {
 
     @Test
     void constructor_shouldNotRequireDistinctEntityByDefault() {
+        // @formatter:off
         SpecificationQueryConfig<Object> queryConfig = SpecificationQueryConfig.builder().build();
+        // @formatter:on
         QueryContext<Object> queryContext = new QueryContext<>(queryConfig);
         assertFalse(queryContext.isEntityDistinctRequired());
     }
 
     @Test
     void getPathToEntityField_whenAttributeIsNotPresent_shouldReturnNull() {
+        // @formatter:off
         SpecificationQueryConfig<Object> queryConfig = SpecificationQueryConfig.builder().build();
+        // @formatter:on
         QueryContext<Object> queryContext = new QueryContext<>(queryConfig);
         String actual = queryContext.getPathToEntityAttribute("invalid");
         assertNull(actual);
@@ -33,11 +37,13 @@ public class QueryContextTest {
     void getPathToEntityFiled_whenAttributeIsPresent_shouldReturnThePath() {
         String attribute = "genreName";
         String expectedPath = "genre";
+        // @formatter:off
         SpecificationQueryConfig<Object> queryConfig = SpecificationQueryConfig.builder()
                 .attributePathConfig()
                 .addAttributePathMapping(attribute, expectedPath)
                 .end()
                 .build();
+        // @formatter:on
 
         QueryContext<Object> queryContext = new QueryContext<>(queryConfig);
 
@@ -47,7 +53,9 @@ public class QueryContextTest {
 
     @Test
     void getJoinItemByAlias_whenAliasIsNotPresent_shouldReturnNull() {
+        // @formatter:off
         SpecificationQueryConfig<Object> queryConfig = SpecificationQueryConfig.builder().build();
+        // @formatter:on
         QueryContext<Object> queryContext = new QueryContext<>(queryConfig);
         JoinItem actual = queryContext.getJoinItemByAlias("invalid alias");
         assertNull(actual);
@@ -58,11 +66,13 @@ public class QueryContextTest {
         JoinItem expectedJoinItem = new JoinItem(Class.class, "genre", "g", JoinType.INNER);
         String alias = "g";
 
+        // @formatter:off
         SpecificationQueryConfig<Object> queryConfig = SpecificationQueryConfig.builder()
                 .joinConfig()
                 .defineJoinClause(Class.class, "genre", "g", JoinType.INNER)
                 .end()
                 .build();
+        // @formatter:on
         QueryContext<Object> queryContext = new QueryContext<>(queryConfig);
 
         JoinItem actual = queryContext.getJoinItemByAlias(alias);
@@ -75,9 +85,12 @@ public class QueryContextTest {
     @Test
     void clearState_shouldClearTheQueryJoins() {
         String alias = "g";
+
+        // @formatter:off
         SpecificationQueryConfig<Object> queryConfig = SpecificationQueryConfig.builder().build();
         QueryContext<Object> queryContext = new QueryContext<>(queryConfig);
         queryContext.addJoin(alias, null);
+        // @formatter:on
 
         assertTrue(queryContext.isJoinPresent(alias));
         queryContext.clearState();
@@ -86,7 +99,9 @@ public class QueryContextTest {
 
     @Test
     void clearState_shouldClearTheRequiredDistinct() {
+        // @formatter:off
         SpecificationQueryConfig<Object> queryConfig = SpecificationQueryConfig.builder().build();
+        // @formatter:on
         QueryContext<Object> queryContext = new QueryContext<>(queryConfig);
         queryContext.setEntityDistinctRequired(true);
 
@@ -97,11 +112,14 @@ public class QueryContextTest {
 
     @Test
     void getCustomSpecificationExpressionByAttribute_whenACustomExpressionIsNotFoundForTheAttribute_shouldReturnNull() {
+        // @formatter:off
         SpecificationQueryConfig<Object> queryConfig = SpecificationQueryConfig.builder()
                 .customExpressionConfig()
                 .addCustomSpecificationExpression("attribute", PathSpecificationExpression.class)
                 .end()
                 .build();
+        // @formatter:on
+
         QueryContext<Object> queryContext = new QueryContext<>(queryConfig);
 
         Class<? extends SpecificationExpression> actual = queryContext.getCustomSpecificationExpressionByAttribute("not-found-attribute");
@@ -110,11 +128,14 @@ public class QueryContextTest {
 
     @Test
     void getCustomSpecificationExpressionByAttribute_whenACustomExpressionIsPresentForTheAttribute_shouldReturnTheExpressionType() {
+        // @formatter:off
         SpecificationQueryConfig<Object> queryConfig = SpecificationQueryConfig.builder()
                 .customExpressionConfig()
                 .addCustomSpecificationExpression("attribute", PathSpecificationExpression.class)
                 .end()
                 .build();
+        // @formatter:on
+
         QueryContext<Object> queryContext = new QueryContext<>(queryConfig);
 
         Class<? extends SpecificationExpression> actual = queryContext.getCustomSpecificationExpressionByAttribute("attribute");

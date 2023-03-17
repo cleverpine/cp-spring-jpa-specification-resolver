@@ -77,6 +77,7 @@
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-core-jakarta</artifactId>
             <version>5.6.12.Final</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 
@@ -199,7 +200,7 @@
     <name>CP Spring JPA Specification Resolver</name>
     <description>A JPA specification resolver library for creating dynamic database queries appropriate for Spring Framework projects
     </description>
-    <url>https://dev.azure.com/cleverpine/JavaLibs/_git/cp-spring-jpa-specification-resolver</url>
+    <url>https://github.com/cleverpine/cp-spring-jpa-specification-resolver</url>
 
     <licenses>
         <license>

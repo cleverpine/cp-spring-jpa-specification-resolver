@@ -3,16 +3,16 @@ package com.cleverpine.specification.expression;
 import com.cleverpine.specification.exception.IllegalSpecificationException;
 import com.cleverpine.specification.item.JoinItem;
 import com.cleverpine.specification.util.QueryContext;
-import java.util.ArrayDeque;
-import java.util.Arrays;
-import java.util.Deque;
-import java.util.Objects;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.Expression;
 import jakarta.persistence.criteria.From;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.Path;
 import jakarta.persistence.criteria.Root;
+import java.util.ArrayDeque;
+import java.util.Arrays;
+import java.util.Deque;
+import java.util.Objects;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -50,6 +50,7 @@ public abstract class SpecificationExpression<T, G> {
     /**
      * Builds a JPA path expression to the entity attribute by building a join or fetch path/s from the root.
      *
+     * @param <S> the type of attribute of the path expression, which will be returned
      * @param entityAttributePath the full path to the entity attribute
      * @param root                the root object of the query
      * @return the path expression to the entity attribute
@@ -63,6 +64,7 @@ public abstract class SpecificationExpression<T, G> {
     /**
      * Builds a join path to the attribute in the entity, starting from the root. It splits the attribute's path.
      *
+     * @param <S> the type of attribute of the join path, which will be returned
      * @param root the root object of the query
      * @return the join path to the attribute
      */
@@ -87,6 +89,7 @@ public abstract class SpecificationExpression<T, G> {
     /**
      * Builds a fetch path to the attribute in the entity, starting from the root. It splits the attribute's path.
      *
+     * @param <S> the type of attribute of the path expression, which will be returned
      * @param root the root object of the query
      * @return the fetch path to the attribute
      */

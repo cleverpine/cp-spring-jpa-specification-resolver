@@ -7,8 +7,8 @@
         <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
 
         <class>com.cleverpine.specification.integration.entity.Movie</class>
-        <!--        <class>com.cleverpine.specification.integration.entity.Genre</class>-->
-        <!--        <class>com.cleverpine.specification.integration.entity.Actor</class>-->
+        <class>com.cleverpine.specification.integration.entity.Genre</class>
+        <class>com.cleverpine.specification.integration.entity.Actor</class>
 
         <properties>
             <!-- Configuring JDBC properties -->
