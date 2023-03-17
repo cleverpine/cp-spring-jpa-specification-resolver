@@ -3,10 +3,10 @@ package com.cleverpine.specification.core;
 import com.cleverpine.specification.exception.InvalidSpecificationException;
 import com.cleverpine.specification.util.QueryContext;
 import com.cleverpine.specification.util.ValueConverter;
-
-import javax.persistence.criteria.*;
 import java.util.List;
 import java.util.Objects;
+import jakarta.persistence.criteria.*;
+
 
 import static com.cleverpine.specification.util.FilterConstants.INVALID_VALUES_COUNT;
 
@@ -24,9 +24,9 @@ public class Between<T> extends MultiValueSpecification<T> {
     /**
      * Constructs a new specification with the given attribute path, values, query context, and value converter.
      *
-     * @param attributePath the path of the property to filter on
-     * @param values the list of two values to filter between
-     * @param queryContext the query context to use for the specification that
+     * @param attributePath  the path of the property to filter on
+     * @param values         the list of two values to filter between
+     * @param queryContext   the query context to use for the specification that
      * @param valueConverter the value converter to use for converting values to the appropriate types
      */
     public Between(String attributePath, List<String> values, QueryContext<T> queryContext, ValueConverter valueConverter) {
@@ -36,10 +36,9 @@ public class Between<T> extends MultiValueSpecification<T> {
     /**
      * Generates a predicate for the criteria API to check whether a given property falls within a specified range of values.
      *
-     * @param root the root entity
-     * @param query the criteria query
+     * @param root            the root entity
+     * @param query           the criteria query
      * @param criteriaBuilder the criteria builder
-     *
      * @return the generated predicate
      * @throws InvalidSpecificationException if the list of values is null or not exactly two values
      */

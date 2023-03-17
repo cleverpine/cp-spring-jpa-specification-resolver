@@ -3,17 +3,24 @@ package com.cleverpine.specification.expression;
 import com.cleverpine.specification.exception.IllegalSpecificationException;
 import com.cleverpine.specification.item.JoinItem;
 import com.cleverpine.specification.util.QueryContext;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-
-import javax.persistence.criteria.*;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.Expression;
+import jakarta.persistence.criteria.From;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.Path;
+import jakarta.persistence.criteria.Root;
 import java.util.ArrayDeque;
 import java.util.Arrays;
 import java.util.Deque;
 import java.util.Objects;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
-import static com.cleverpine.specification.util.FilterConstants.*;
+
+import static com.cleverpine.specification.util.FilterConstants.ENTITY_ATTRIBUTE_SEPARATOR;
+import static com.cleverpine.specification.util.FilterConstants.INVALID_JOIN;
+import static com.cleverpine.specification.util.FilterConstants.JOIN_NOT_DEFINED;
 
 /**
  * The SpecificationExpression class is an abstract class that serves as the base class for all specification
@@ -43,11 +50,12 @@ public abstract class SpecificationExpression<T, G> {
     /**
      * Builds a JPA path expression to the entity attribute by building a join or fetch path/s from the root.
      *
+     * @param <S> the type of attribute of the path expression, which will be returned
      * @param entityAttributePath the full path to the entity attribute
      * @param root                the root object of the query
      * @return the path expression to the entity attribute
      */
-    protected Path<G> buildPathExpressionToEntityAttribute(String entityAttributePath, Root<T> root) {
+    protected <S> Path<S> buildPathExpressionToEntityAttribute(String entityAttributePath, Root<T> root) {
         return queryContext.isEntityDistinctRequired()
                 ? buildFetchPathToAttribute(root, entityAttributePath)
                 : buildJoinPathToAttribute(root, entityAttributePath);
@@ -56,10 +64,11 @@ public abstract class SpecificationExpression<T, G> {
     /**
      * Builds a join path to the attribute in the entity, starting from the root. It splits the attribute's path.
      *
+     * @param <S> the type of attribute of the join path, which will be returned
      * @param root the root object of the query
      * @return the join path to the attribute
      */
-    private Path<G> buildJoinPathToAttribute(Root<T> root, String path) {
+    private <S> Path<S> buildJoinPathToAttribute(Root<T> root, String path) {
         if (isSingleAttributePath(path)) {
             return root.get(path);
         }
@@ -80,10 +89,11 @@ public abstract class SpecificationExpression<T, G> {
     /**
      * Builds a fetch path to the attribute in the entity, starting from the root. It splits the attribute's path.
      *
+     * @param <S> the type of attribute of the path expression, which will be returned
      * @param root the root object of the query
      * @return the fetch path to the attribute
      */
-    private Path<G> buildFetchPathToAttribute(Root<T> root, String path) {
+    private <S> Path<S> buildFetchPathToAttribute(Root<T> root, String path) {
         if (isSingleAttributePath(path)) {
             return root.get(path);
         }

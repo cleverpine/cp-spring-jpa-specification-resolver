@@ -3,13 +3,12 @@ package com.cleverpine.specification.core;
 import com.cleverpine.specification.expression.SpecificationExpression;
 import com.cleverpine.specification.expression.SpecificationExpressionFactory;
 import com.cleverpine.specification.util.QueryContext;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.Expression;
+import jakarta.persistence.criteria.Root;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.jpa.domain.Specification;
-
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.Expression;
-import javax.persistence.criteria.Root;
 
 /**
  * A base class for specifications that involve an attribute path, which is used on the specification's expression build.

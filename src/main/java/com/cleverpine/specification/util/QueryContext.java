@@ -3,7 +3,7 @@ package com.cleverpine.specification.util;
 import com.cleverpine.specification.expression.SpecificationExpression;
 import com.cleverpine.specification.item.JoinItem;
 
-import javax.persistence.criteria.Join;
+import jakarta.persistence.criteria.Join;
 import java.util.HashMap;
 import java.util.Map;
 

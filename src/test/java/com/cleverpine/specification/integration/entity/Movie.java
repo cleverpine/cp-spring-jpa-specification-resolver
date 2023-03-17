@@ -1,9 +1,8 @@
 package com.cleverpine.specification.integration.entity;
 
-import lombok.Data;
-
-import javax.persistence.*;
 import java.util.Set;
+import jakarta.persistence.*;
+import lombok.Data;
 
 @Entity
 @Table(name = "movies")
@@ -23,7 +22,7 @@ public class Movie {
     @JoinTable(name = "movies_actors", joinColumns = {
             @JoinColumn(name = "movie_id", referencedColumnName = "id")
     }, inverseJoinColumns =
-            @JoinColumn(name = "actor_id", referencedColumnName = "id"))
+    @JoinColumn(name = "actor_id", referencedColumnName = "id"))
     private Set<Actor> actors;
 
 }

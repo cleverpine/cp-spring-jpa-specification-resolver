@@ -5,7 +5,7 @@ import com.cleverpine.specification.item.*;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
-import javax.persistence.criteria.JoinType;
+import jakarta.persistence.criteria.JoinType;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;

@@ -13,19 +13,29 @@ import com.cleverpine.specification.parser.SpecificationParserManager;
 import com.cleverpine.specification.parser.json.FilterJsonArrayParser;
 import com.cleverpine.specification.parser.json.SortJsonArrayParser;
 import com.cleverpine.specification.producer.ComplexSpecificationProducer;
-import com.cleverpine.specification.util.*;
+import com.cleverpine.specification.util.FilterOperator;
+import com.cleverpine.specification.util.SortDirection;
+import com.cleverpine.specification.util.SpecificationQueryConfig;
+import com.cleverpine.specification.util.SpecificationRequest;
+import com.cleverpine.specification.util.ValueConverter;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.springframework.data.jpa.domain.Specification;
-
-import javax.persistence.criteria.JoinType;
+import jakarta.persistence.criteria.JoinType;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.data.jpa.domain.Specification;
 
-import static org.junit.jupiter.api.Assertions.*;
+
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class SpecificationProducerIT extends SpecificationProducerIntegrationTest {
 
@@ -37,27 +47,26 @@ public class SpecificationProducerIT extends SpecificationProducerIntegrationTes
         // @formatter:off
         SPECIFICATION_QUERY_CONFIG = SpecificationQueryConfig.<Movie>builder()
                 .joinConfig()
-                    .defineJoinClause(Movie.class, "genre", "g", JoinType.INNER)
-                    .defineJoinClause(Movie.class, "actors", "a", JoinType.INNER)
-                    .end()
+                .defineJoinClause(Movie.class, "genre", "g", JoinType.INNER)
+                .defineJoinClause(Movie.class, "actors", "a", JoinType.INNER)
+                .end()
                 .attributePathConfig()
-                    .addAttributePathMapping("movieTitle", "title")
-                    .addAttributePathMapping("genreName", "g.name")
-                    .addAttributePathMapping("actorFirstName", "a.filterName")
-                    .addAttributePathMapping("actorLastName", "a.lastName")
-                    .end()
+                .addAttributePathMapping("movieTitle", "title")
+                .addAttributePathMapping("genreName", "g.name")
+                .addAttributePathMapping("actorFirstName", "a.filterName")
+                .addAttributePathMapping("actorLastName", "a.lastName")
+                .end()
                 .build();
         // @formatter:on
     }
 
     private ComplexSpecificationProducer<Movie> movieSpecificationProducer;
 
-
     public SpecificationProducerIT() {
         super(SpecificationParserManager.builder()
-                .withSingleFilterParser(new FilterJsonArrayParser(new ObjectMapper()))
-                .withSingleSortParser(new SortJsonArrayParser(new ObjectMapper()))
-                .build(),
+                        .withSingleFilterParser(new FilterJsonArrayParser(new ObjectMapper()))
+                        .withSingleSortParser(new SortJsonArrayParser(new ObjectMapper()))
+                        .build(),
                 VALUE_CONVERTER);
     }
 
@@ -188,11 +197,13 @@ public class SpecificationProducerIT extends SpecificationProducerIntegrationTes
                 List.of(
                         List.of("genreName", "eq", "Action")));
 
+        // @formatter:off
         SpecificationQueryConfig<Movie> specificationQueryConfig = SpecificationQueryConfig.<Movie>builder()
                 .attributePathConfig()
-                    .addAttributePathMapping("genreName", "g.name")
-                    .end()
+                .addAttributePathMapping("genreName", "g.name")
+                .end()
                 .build();
+        // @formatter:on
 
         ComplexSpecificationProducer<Movie> specificationProducer = new ComplexSpecificationProducer<>(
                 specificationParserManager,
@@ -218,11 +229,13 @@ public class SpecificationProducerIT extends SpecificationProducerIntegrationTes
                 List.of(
                         List.of("genreName", "eq", "Action")));
 
+        // @formatter:off
         SpecificationQueryConfig<Movie> specificationQueryConfig = SpecificationQueryConfig.<Movie>builder()
                 .joinConfig()
-                    .defineJoinClause(Movie.class, "genre", "g", JoinType.INNER)
-                    .end()
+                .defineJoinClause(Movie.class, "genre", "g", JoinType.INNER)
+                .end()
                 .build();
+        // @formatter:on
 
         ComplexSpecificationProducer<Movie> specificationProducer = new ComplexSpecificationProducer<>(
                 specificationParserManager,
@@ -272,14 +285,16 @@ public class SpecificationProducerIT extends SpecificationProducerIntegrationTes
                 List.of(
                         List.of("genreName", "eq", expectedGenre)));
 
+        // @formatter:off
         SpecificationQueryConfig<Movie> specificationQueryConfig = SpecificationQueryConfig.<Movie>builder()
                 .joinConfig()
-                    .defineJoinClause(Actor.class, "genre", "g", JoinType.INNER)
-                    .end()
+                .defineJoinClause(Actor.class, "genre", "g", JoinType.INNER)
+                .end()
                 .attributePathConfig()
-                    .addAttributePathMapping("genreName", "g.name")
-                    .end()
+                .addAttributePathMapping("genreName", "g.name")
+                .end()
                 .build();
+        // @formatter:on
 
         ComplexSpecificationProducer<Movie> specificationProducer = new ComplexSpecificationProducer<>(
                 specificationParserManager,
@@ -502,12 +517,13 @@ public class SpecificationProducerIT extends SpecificationProducerIntegrationTes
 
     @Test
     void findAll_onSortForFlatEntityAttribute_shouldReturnValidResult() {
-
+        // @formatter:off
         SpecificationQueryConfig<Movie> specificationQueryConfig = SpecificationQueryConfig.<Movie>builder()
                 .orderByConfig()
-                    .addOrderBy("title", SortDirection.DESC)
-                    .end()
+                .addOrderBy("title", SortDirection.DESC)
+                .end()
                 .build();
+        // @formatter:on
 
         ComplexSpecificationProducer<Movie> specificationProducer = new ComplexSpecificationProducer<>(
                 specificationParserManager,
@@ -529,11 +545,13 @@ public class SpecificationProducerIT extends SpecificationProducerIntegrationTes
 
     @Test
     void findAll_onSortForFilterAttributeThatDoesNotExist_shouldThrow() {
+        // @formatter:off
         SpecificationQueryConfig<Movie> specificationQueryConfig = SpecificationQueryConfig.<Movie>builder()
                 .orderByConfig()
-                    .addOrderBy("invalidAttribute", SortDirection.DESC)
-                    .end()
+                .addOrderBy("invalidAttribute", SortDirection.DESC)
+                .end()
                 .build();
+        // @formatter:on
 
         ComplexSpecificationProducer<Movie> specificationProducer = new ComplexSpecificationProducer<>(
                 specificationParserManager,
@@ -551,14 +569,16 @@ public class SpecificationProducerIT extends SpecificationProducerIntegrationTes
 
     @Test
     void findAll_onSortForNestedEntityAttributeAndJoinNotDefined_shouldThrow() {
+        // @formatter:off
         SpecificationQueryConfig<Movie> specificationQueryConfig = SpecificationQueryConfig.<Movie>builder()
                 .attributePathConfig()
-                    .addAttributePathMapping("genreName", "g.name")
-                    .end()
+                .addAttributePathMapping("genreName", "g.name")
+                .end()
                 .orderByConfig()
-                    .addOrderBy("genreName", SortDirection.DESC)
-                    .end()
+                .addOrderBy("genreName", SortDirection.DESC)
+                .end()
                 .build();
+        // @formatter:on
 
         ComplexSpecificationProducer<Movie> specificationProducer = new ComplexSpecificationProducer<>(
                 specificationParserManager,
@@ -578,18 +598,19 @@ public class SpecificationProducerIT extends SpecificationProducerIntegrationTes
 
     @Test
     void findAll_onSortForNestedEntityAttributeAndJoinIsPresent_shouldReturnValidResult() {
-
+        // @formatter:off
         SpecificationQueryConfig<Movie> specificationQueryConfig = SpecificationQueryConfig.<Movie>builder()
                 .joinConfig()
-                    .defineJoinClause(Movie.class, "genre", "g", JoinType.INNER)
-                    .end()
+                .defineJoinClause(Movie.class, "genre", "g", JoinType.INNER)
+                .end()
                 .attributePathConfig()
-                    .addAttributePathMapping("genreName", "g.name")
-                    .end()
+                .addAttributePathMapping("genreName", "g.name")
+                .end()
                 .orderByConfig()
-                    .addOrderBy("genreName", SortDirection.DESC)
-                    .end()
+                .addOrderBy("genreName", SortDirection.DESC)
+                .end()
                 .build();
+        // @formatter:on
 
         ComplexSpecificationProducer<Movie> specificationProducer = new ComplexSpecificationProducer<>(
                 specificationParserManager,
@@ -611,18 +632,19 @@ public class SpecificationProducerIT extends SpecificationProducerIntegrationTes
 
     @Test
     void findAll_onSortAndFilterForNestedEntityAttribute_shouldReturnValidResult() {
-
+        // @formatter:off
         SpecificationQueryConfig<Movie> specificationQueryConfig = SpecificationQueryConfig.<Movie>builder()
                 .joinConfig()
-                    .defineJoinClause(Movie.class, "genre", "g", JoinType.INNER)
-                    .end()
+                .defineJoinClause(Movie.class, "genre", "g", JoinType.INNER)
+                .end()
                 .attributePathConfig()
-                    .addAttributePathMapping("genreName", "g.name")
-                    .end()
+                .addAttributePathMapping("genreName", "g.name")
+                .end()
                 .orderByConfig()
-                    .addOrderBy("genreName", SortDirection.DESC)
-                    .end()
+                .addOrderBy("genreName", SortDirection.DESC)
+                .end()
                 .build();
+        // @formatter:on
 
         ComplexSpecificationProducer<Movie> specificationProducer = new ComplexSpecificationProducer<>(
                 specificationParserManager,
@@ -649,19 +671,20 @@ public class SpecificationProducerIT extends SpecificationProducerIntegrationTes
 
     @Test
     void findAll_onComplexFilterAndSort_shouldReturnValidResult() {
-
+        // @formatter:off
         SpecificationQueryConfig<Movie> specificationQueryConfig = SpecificationQueryConfig.<Movie>builder()
                 .joinConfig()
-                    .defineJoinClause(Movie.class, "actors", "a", JoinType.INNER)
-                    .end()
+                .defineJoinClause(Movie.class, "actors", "a", JoinType.INNER)
+                .end()
                 .attributePathConfig()
-                    .addAttributePathMapping("actorFirstName", "a.firstName")
-                    .addAttributePathMapping("actorLastName", "a.lastName")
-                    .end()
+                .addAttributePathMapping("actorFirstName", "a.firstName")
+                .addAttributePathMapping("actorLastName", "a.lastName")
+                .end()
                 .orderByConfig()
-                    .addOrderBy("actorFirstName", SortDirection.DESC)
-                    .end()
+                .addOrderBy("actorFirstName", SortDirection.DESC)
+                .end()
                 .build();
+        // @formatter:on
 
         ComplexSpecificationProducer<Movie> specificationProducer = new ComplexSpecificationProducer<>(
                 specificationParserManager,
@@ -686,20 +709,21 @@ public class SpecificationProducerIT extends SpecificationProducerIntegrationTes
 
     @Test
     void findAll_onNotDistinctEntity_shouldReturnDuplicates() {
-
+        // @formatter:off
         SpecificationQueryConfig<Movie> specificationQueryConfig = SpecificationQueryConfig.<Movie>builder()
                 .joinConfig()
-                    .defineJoinClause(Movie.class, "actors", "a", JoinType.INNER)
-                    .end()
+                .defineJoinClause(Movie.class, "actors", "a", JoinType.INNER)
+                .end()
                 .attributePathConfig()
-                    .addAttributePathMapping("actorFirstName", "a.firstName")
-                    .addAttributePathMapping("actorLastName", "a.lastName")
-                    .end()
+                .addAttributePathMapping("actorFirstName", "a.firstName")
+                .addAttributePathMapping("actorLastName", "a.lastName")
+                .end()
                 .orderByConfig()
-                    .addOrderBy("actorFirstName", SortDirection.DESC)
-                    .end()
+                .addOrderBy("actorFirstName", SortDirection.DESC)
+                .end()
                 .entityDistinctRequired(false)
                 .build();
+        // @formatter:on
 
         ComplexSpecificationProducer<Movie> specificationProducer = new ComplexSpecificationProducer<>(
                 specificationParserManager,
@@ -723,7 +747,7 @@ public class SpecificationProducerIT extends SpecificationProducerIntegrationTes
 
     @Test
     void findAll_onDistinctEntity_shouldReturnNoDuplicates() {
-
+        // @formatter:off
         SpecificationQueryConfig<Movie> specificationQueryConfig = SpecificationQueryConfig.<Movie>builder()
                 .joinConfig()
                 .defineJoinClause(Movie.class, "actors", "a", JoinType.INNER)
@@ -732,11 +756,12 @@ public class SpecificationProducerIT extends SpecificationProducerIntegrationTes
                 .addAttributePathMapping("actorFirstName", "a.firstName")
                 .addAttributePathMapping("actorLastName", "a.lastName")
                 .end()
-                    .orderByConfig()
-                    .addOrderBy("actorFirstName", SortDirection.DESC)
-                    .end()
+                .orderByConfig()
+                .addOrderBy("actorFirstName", SortDirection.DESC)
+                .end()
                 .entityDistinctRequired(true)
                 .build();
+        // @formatter:on
 
         ComplexSpecificationProducer<Movie> specificationProducer = new ComplexSpecificationProducer<>(
                 specificationParserManager,
@@ -841,17 +866,19 @@ public class SpecificationProducerIT extends SpecificationProducerIntegrationTes
 
     @Test
     void findAll_withDefaultFilterItems_shouldReturnValidResult() {
+        // @formatter:off
         SpecificationQueryConfig<Movie> specificationQueryConfig = SpecificationQueryConfig.<Movie>builder()
                 .joinConfig()
-                    .defineJoinClause(Movie.class, "genre", "g", JoinType.INNER)
-                    .end()
+                .defineJoinClause(Movie.class, "genre", "g", JoinType.INNER)
+                .end()
                 .attributePathConfig()
-                    .addAttributePathMapping("genreName", "g.name")
-                    .end()
+                .addAttributePathMapping("genreName", "g.name")
+                .end()
                 .filterConfig()
-                    .addFilter("genreName", FilterOperator.EQUAL, "Comedy")
-                    .end()
+                .addFilter("genreName", FilterOperator.EQUAL, "Comedy")
+                .end()
                 .build();
+        // @formatter:on
 
         ComplexSpecificationProducer<Movie> specificationProducer = new ComplexSpecificationProducer<>(
                 specificationParserManager,
@@ -871,24 +898,25 @@ public class SpecificationProducerIT extends SpecificationProducerIntegrationTes
 
     @Test
     void findAll_onCustomAttributeExpression_shouldReturnValidResult() {
+        // @formatter:off
         SpecificationQueryConfig<Movie> specificationQueryConfig = SpecificationQueryConfig.<Movie>builder()
                 .joinConfig()
-                    .defineJoinClause(Movie.class, "genre", "g", JoinType.INNER)
-                    .end()
+                .defineJoinClause(Movie.class, "genre", "g", JoinType.INNER)
+                .end()
                 .attributePathConfig()
-                    .addAttributePathMapping("genreName", "g.name")
-                    .end()
+                .addAttributePathMapping("genreName", "g.name")
+                .end()
                 .customExpressionConfig()
-                    .addCustomSpecificationExpression("titleGenreName", MovieTitleAndGenreSpecExpression.class)
-                    .end()
+                .addCustomSpecificationExpression("titleGenreName", MovieTitleAndGenreSpecExpression.class)
+                .end()
                 .build();
+        // @formatter:on
 
         ComplexSpecificationProducer<Movie> specificationProducer = new ComplexSpecificationProducer<>(
                 specificationParserManager,
                 MovieFilterCriteria.class,
                 valueConverter,
                 specificationQueryConfig);
-
 
         SpecificationRequest<Movie> specificationRequest = SpecificationRequest.<Movie>builder()
                 .withFilterItems(List.of(new SingleFilterItem<>("titleGenreName", FilterOperator.EQUAL, "ITHorror")))
@@ -905,4 +933,47 @@ public class SpecificationProducerIT extends SpecificationProducerIntegrationTes
         assertEquals("Horror", actualMovie.getGenre().getName());
     }
 
+    @Test
+    void findAll_onStartsWithAttributeExpression_shouldReturnValidResult() {
+        ComplexSpecificationProducer<Movie> specificationProducer = new ComplexSpecificationProducer<>(
+                specificationParserManager,
+                MovieFilterCriteria.class,
+                valueConverter);
+
+        SpecificationRequest<Movie> specificationRequest = SpecificationRequest.<Movie>builder()
+                .withFilterItems(List.of(new SingleFilterItem<>("title", FilterOperator.STARTS_WITH, "De")))
+                .build();
+
+        Specification<Movie> movieSpecification = specificationProducer.createSpecification(specificationRequest);
+        List<Movie> actual = findAll(movieSpecification, Movie.class);
+
+        assertEquals(2, actual.size());
+
+        Movie firstMovie = actual.get(0);
+        Movie secondMovie = actual.get(1);
+
+        assertEquals("Deadpool", firstMovie.getTitle());
+        assertEquals("Deadpool 2", secondMovie.getTitle());
+    }
+
+    @Test
+    void findAll_onEndsWithAttributeExpression_shouldReturnValidResult() {
+        ComplexSpecificationProducer<Movie> specificationProducer = new ComplexSpecificationProducer<>(
+                specificationParserManager,
+                MovieFilterCriteria.class,
+                valueConverter);
+
+        SpecificationRequest<Movie> specificationRequest = SpecificationRequest.<Movie>builder()
+                .withFilterItems(List.of(new SingleFilterItem<>("title", FilterOperator.ENDS_WITH, "Furious")))
+                .build();
+
+        Specification<Movie> movieSpecification = specificationProducer.createSpecification(specificationRequest);
+        List<Movie> actual = findAll(movieSpecification, Movie.class);
+
+        assertEquals(1, actual.size());
+
+        Movie actualMovie = actual.get(0);
+
+        assertEquals("Fast and Furious", actualMovie.getTitle());
+    }
 }

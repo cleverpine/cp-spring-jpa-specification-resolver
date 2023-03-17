@@ -2,17 +2,16 @@ package com.cleverpine.specification.integration.test;
 
 import com.cleverpine.specification.parser.SpecificationParserManager;
 import com.cleverpine.specification.util.ValueConverter;
-import org.junit.jupiter.api.BeforeAll;
-import org.springframework.data.jpa.domain.Specification;
-
-import javax.persistence.EntityManager;
-import javax.persistence.Persistence;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
 import java.util.List;
 import java.util.stream.Collectors;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.Persistence;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
+import org.junit.jupiter.api.BeforeAll;
+import org.springframework.data.jpa.domain.Specification;
 
 public class SpecificationProducerIntegrationTest {
 
@@ -25,7 +24,7 @@ public class SpecificationProducerIntegrationTest {
     protected final ValueConverter valueConverter;
 
     protected SpecificationProducerIntegrationTest(SpecificationParserManager specificationParserManager,
-                                                   ValueConverter valueConverter) {
+            ValueConverter valueConverter) {
         this.specificationParserManager = specificationParserManager;
         this.valueConverter = valueConverter;
     }
@@ -54,8 +53,8 @@ public class SpecificationProducerIntegrationTest {
                                 filterParamItems.get(1),
                                 filterParamItems.get(2)))
                 .collect(Collectors.joining(","));
-        return String.format("[%s]", collect); }
-
+        return String.format("[%s]", collect);
+    }
 
     protected String createJsonArraySortParam(List<List<String>> sortParams) {
         String collect = sortParams.stream()
@@ -64,15 +63,15 @@ public class SpecificationProducerIntegrationTest {
                                 sortParamItems.get(0),
                                 sortParamItems.get(1)))
                 .collect(Collectors.joining(","));
-        return collect; }
-
-
-        private <T > CriteriaQuery < T > getQuery(Specification < T > specification, Class < T > entityType) {
-            CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
-            CriteriaQuery<T> query = criteriaBuilder.createQuery(entityType);
-            Root<T> root = query.from(entityType);
-            Predicate predicate = specification.toPredicate(root, query, criteriaBuilder);
-            query.where(predicate);
-            return query;
-        }
+        return collect;
     }
+
+    private <T> CriteriaQuery<T> getQuery(Specification<T> specification, Class<T> entityType) {
+        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+        CriteriaQuery<T> query = criteriaBuilder.createQuery(entityType);
+        Root<T> root = query.from(entityType);
+        Predicate predicate = specification.toPredicate(root, query, criteriaBuilder);
+        query.where(predicate);
+        return query;
+    }
+}

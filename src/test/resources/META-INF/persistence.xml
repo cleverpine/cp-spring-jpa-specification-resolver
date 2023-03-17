@@ -7,13 +7,14 @@
         <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
 
         <class>com.cleverpine.specification.integration.entity.Movie</class>
-<!--        <class>com.cleverpine.specification.integration.entity.Genre</class>-->
-<!--        <class>com.cleverpine.specification.integration.entity.Actor</class>-->
+        <class>com.cleverpine.specification.integration.entity.Genre</class>
+        <class>com.cleverpine.specification.integration.entity.Actor</class>
 
         <properties>
             <!-- Configuring JDBC properties -->
-            <property name="javax.persistence.jdbc.url" value="jdbc:h2:mem:test;DB_CLOSE_DELAY=-1;INIT=RUNSCRIPT FROM 'classpath:create.sql'\;RUNSCRIPT FROM 'classpath:data.sql'"/>
-            <property name="javax.persistence.jdbc.driver" value="org.h2.Driver"/>
+            <property name="jakarta.persistence.jdbc.url"
+                      value="jdbc:h2:mem:test;DB_CLOSE_DELAY=-1;INIT=RUNSCRIPT FROM 'classpath:create.sql'\;RUNSCRIPT FROM 'classpath:data.sql'"/>
+            <property name="jakarta.persistence.jdbc.driver" value="org.h2.Driver"/>
 
             <!-- Hibernate properties -->
             <property name="hibernate.dialect" value="org.hibernate.dialect.H2Dialect"/>
