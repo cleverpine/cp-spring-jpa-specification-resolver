@@ -81,7 +81,7 @@ public class SpecificationProducerIT extends SpecificationProducerIntegrationTes
 
     @Test
     void createSpecification_onInvalidFilterParam_shouldThrow() {
-        String filterParam = "[[\"id\",\"eq\"]]";
+        String filterParam = "[[\"id\"]";
 
         SpecificationRequest<Movie> specificationRequest = SpecificationRequest.<Movie>builder()
                 .withFilterParam(filterParam)
@@ -838,7 +838,7 @@ public class SpecificationProducerIT extends SpecificationProducerIntegrationTes
     }
 
     @Test
-    void findAll_whenValidFilterAndSort_shouldReturnValidResult() {
+    void findAll_whenFilterAndSort_shouldReturnValidResult() {
         String firstGenre = "Action";
         String secondGenre = "Comedy";
         String filterParam = createJsonArrayFilterParam(
@@ -941,7 +941,7 @@ public class SpecificationProducerIT extends SpecificationProducerIntegrationTes
                 valueConverter);
 
         SpecificationRequest<Movie> specificationRequest = SpecificationRequest.<Movie>builder()
-                .withFilterItems(List.of(new SingleFilterItem<>("title", FilterOperator.STARTS_WITH, "De")))
+                .withFilterItems(List.of(new SingleFilterItem<>("title", FilterOperator.STARTS_WITH, "Deadpool")))
                 .build();
 
         Specification<Movie> movieSpecification = specificationProducer.createSpecification(specificationRequest);

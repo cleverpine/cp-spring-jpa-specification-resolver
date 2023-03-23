@@ -8,15 +8,18 @@ import com.cleverpine.specification.util.ValueConverter;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
@@ -70,11 +73,11 @@ public class FilterJsonArrayParserTest {
 
     @Test
     void parseFilterParam_onValidJsonArrayParamsButInvalidFilterItemParamsCount_shouldThrow() throws JsonProcessingException {
-        List<List<String>> parsedResult = List.of(List.of("param", "in"));
+        List<List<String>> parsedResult = List.of(List.of("param"));
         when(objectMapper.readValue(anyString(), any(TypeReference.class)))
                 .thenReturn(parsedResult);
 
-        String jsonArray = "[[\"param\",\"in\"]]";
+        String jsonArray = "[[\"param\"]";
         assertThrows(
                 InvalidSpecificationException.class,
                 () -> filterJsonArrayParser.parseFilterParam(jsonArray)

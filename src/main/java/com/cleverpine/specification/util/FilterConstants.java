@@ -67,5 +67,7 @@ public final class FilterConstants {
 
     public static final Integer VALID_FILTER_ARGS_COUNT = 3;
 
+    public static final Integer VALID_FILTER_ARGS_WITHOUT_VALUE_COUNT = 2;
+
     public static final Integer VALID_SORT_ARGS_COUNT = 2;
 }
