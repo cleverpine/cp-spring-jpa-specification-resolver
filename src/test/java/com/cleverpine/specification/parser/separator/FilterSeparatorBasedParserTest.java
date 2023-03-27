@@ -62,24 +62,6 @@ public class FilterSeparatorBasedParserTest {
         assertTrue(actual.isEmpty());
     }
 
-    //TODO
-//    @Test
-//    void parseFilterParams_onInvalidFilterParam_shouldThrowException() {
-//        assertThrows(
-//                InvalidSpecificationException.class,
-//                () -> filterSeparatorBasedParser.parseFilterParams(List.of("filter-invalid"))
-//        );
-//    }
-
-    // TODO
-//    @Test
-//    void parseFilterParams_onDifferentFilterSeparator_shouldThrowException() {
-//        assertThrows(
-//                InvalidSpecificationException.class,
-//                () -> filterSeparatorBasedParser.parseFilterParams(List.of("attribute;eq;34"))
-//        );
-//    }
-
     @Test
     void parseFilterParams_whenFilterOperatorIsNotFound_shouldThrowException() {
         assertThrows(

@@ -46,17 +46,15 @@ public class FilterSeparatorBasedParser implements MultipleFilterParser {
         }
         return filterParams.stream()
                 .filter(StringUtils::hasLength)
+                .map(filterParam -> Arrays.stream(filterParam.split(separator)).toList())
                 .filter(this::isValueArgOfFilterNotEmpty)
                 .map(this::<T>createFilterItem)
                 .collect(Collectors.toList());
     }
 
-    private boolean isValueArgOfFilterNotEmpty(String filterParam) {
-        List<String> filterArgs = Arrays.stream(filterParam.split(separator))
-                .collect(Collectors.toList());
-
-        if(filterArgs.size() == 3) {
-            return !filterArgs.get(2).isBlank();
+    private boolean isValueArgOfFilterNotEmpty(List<String> filterParams) {
+        if(filterParams.size() == VALID_FILTER_ARGS_COUNT) {
+            return !filterParams.get(2).isBlank();
         }
 
         return false;
@@ -69,22 +67,19 @@ public class FilterSeparatorBasedParser implements MultipleFilterParser {
      * Creates a {@link SingleFilterItem} if the operator is a single value operator,
      * or a {@link MultiFilterItem} if the operator is a multi-value operator.
      *
-     * @param filterParam the filter param containing filter arguments.
+     * @param filterParams the filter param containing filter arguments.
      * @return a {@link FilterItem} parsed from the list of filter item arguments.
      * @throws InvalidSpecificationException if the list of filter item arguments is invalid.
      */
-    private <T> FilterItem<T> createFilterItem(String filterParam) {
-        if (Objects.isNull(filterParam)) {
+    private <T> FilterItem<T> createFilterItem(List<String> filterParams) {
+        if (Objects.isNull(filterParams)) {
             throw new InvalidSpecificationException(
                     String.format(INVALID_FILTER_ARGS_COUNT, VALID_FILTER_ARGS_COUNT));
         }
 
-        List<String> filterArgs = Arrays.stream(filterParam.split(separator))
-                .collect(Collectors.toList());
-
         Function<String, List<String>> multipleValuesParserHandler = values -> Arrays.stream(values.split(valuesSeparator))
                 .collect(Collectors.toList());
 
-        return SpecificationUtil.createFilterItem(filterArgs, multipleValuesParserHandler);
+        return SpecificationUtil.createFilterItem(filterParams, multipleValuesParserHandler);
     }
 }

@@ -5,12 +5,12 @@ import com.cleverpine.specification.item.FilterItem;
 import com.cleverpine.specification.item.MultiFilterItem;
 import com.cleverpine.specification.item.OrderByItem;
 import com.cleverpine.specification.item.SingleFilterItem;
-import org.junit.jupiter.api.Test;
-
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import org.junit.jupiter.api.Test;
+
 
 import static com.cleverpine.specification.util.FilterConstants.EMPTY_STRING;
 import static com.cleverpine.specification.util.FilterConstants.ENTITY_ATTRIBUTE_SEPARATOR;
@@ -129,5 +129,23 @@ public class SpecificationUtilTest {
 
         assertEquals(MultiFilterItem.class, actual.getClass());
         assertEquals("attribute", actual.getAttribute());
+    }
+
+    @Test
+    void createFilterItem_onInvalidFilterParam_shouldThrowException() {
+        Function<String, List<String>> valuesParserHandler = values -> Arrays.stream(values.split(":")).collect(Collectors.toList());
+        assertThrows(
+                InvalidSpecificationException.class,
+                () -> SpecificationUtil.createFilterItem(List.of("filter-invalid"), valuesParserHandler)
+        );
+    }
+
+    @Test
+    void createFilterItem_onDifferentFilterSeparator_shouldThrowException() {
+        Function<String, List<String>> valuesParserHandler = values -> Arrays.stream(values.split(":")).collect(Collectors.toList());
+        assertThrows(
+                InvalidSpecificationException.class,
+                () -> SpecificationUtil.createFilterItem(List.of("attribute;eq;34"), valuesParserHandler)
+        );
     }
 }
