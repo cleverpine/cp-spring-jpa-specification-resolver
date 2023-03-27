@@ -18,7 +18,7 @@
         <junit-jupiter-engine.version>5.9.0</junit-jupiter-engine.version>
         <mockito-core.version>4.8.0</mockito-core.version>
         <mockito-junit-jupiter.version>4.8.0</mockito-junit-jupiter.version>
-        <revision>2.1.0</revision>
+        <revision>2.2.0</revision>
     </properties>
 
     <dependencies>

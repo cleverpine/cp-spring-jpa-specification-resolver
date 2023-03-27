@@ -6,16 +6,16 @@ import com.cleverpine.specification.item.MultiFilterItem;
 import com.cleverpine.specification.item.SingleFilterItem;
 import com.cleverpine.specification.parser.MultipleFilterParser;
 import com.cleverpine.specification.util.SpecificationUtil;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import org.springframework.util.StringUtils;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import org.springframework.util.StringUtils;
+
 
 import static com.cleverpine.specification.util.FilterConstants.INVALID_FILTER_ARGS_COUNT;
 import static com.cleverpine.specification.util.FilterConstants.VALID_FILTER_ARGS_COUNT;
@@ -46,8 +46,20 @@ public class FilterSeparatorBasedParser implements MultipleFilterParser {
         }
         return filterParams.stream()
                 .filter(StringUtils::hasLength)
+                .filter(this::isValueArgOfFilterNotEmpty)
                 .map(this::<T>createFilterItem)
                 .collect(Collectors.toList());
+    }
+
+    private boolean isValueArgOfFilterNotEmpty(String filterParam) {
+        List<String> filterArgs = Arrays.stream(filterParam.split(separator))
+                .collect(Collectors.toList());
+
+        if(filterArgs.size() == 3) {
+            return !filterArgs.get(2).isBlank();
+        }
+
+        return false;
     }
 
     /**
