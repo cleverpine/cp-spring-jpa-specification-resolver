@@ -17,7 +17,6 @@ import static com.cleverpine.specification.util.FilterConstants.INVALID_FILTER_O
 import static com.cleverpine.specification.util.FilterConstants.INVALID_SORT_ARGS_COUNT;
 import static com.cleverpine.specification.util.FilterConstants.INVALID_SORT_DIRECTION;
 import static com.cleverpine.specification.util.FilterConstants.VALID_FILTER_ARGS_COUNT;
-import static com.cleverpine.specification.util.FilterConstants.VALID_FILTER_ARGS_WITHOUT_VALUE_COUNT;
 import static com.cleverpine.specification.util.FilterConstants.VALID_SORT_ARGS_COUNT;
 
 /**
@@ -99,17 +98,9 @@ public final class SpecificationUtil {
                     String.format(INVALID_FILTER_ARGS_COUNT, VALID_FILTER_ARGS_COUNT));
         }
 
-//      We first initialize the value to empty string, in case that the request doesn't have value defined,
-//      for example - partNumber:sw:
-        String value = EMPTY_STRING;
-
-//      If the request contains value, it will be assigned here.
-        if(filterArgs.size() == VALID_FILTER_ARGS_COUNT) {
-            value = filterArgs.get(2);
-        }
-
         String filterAttribute = filterArgs.get(0);
         String operatorValue = filterArgs.get(1);
+        String value = filterArgs.get(2);
 
         FilterOperator operator = SpecificationUtil.getFilterOperatorByValue(operatorValue);
 
@@ -122,7 +113,7 @@ public final class SpecificationUtil {
     }
 
     public static boolean isFilterItemValid(List<String> filterArgs) {
-        return filterArgs.size() == VALID_FILTER_ARGS_COUNT || filterArgs.size() == VALID_FILTER_ARGS_WITHOUT_VALUE_COUNT;
+        return filterArgs.size() == VALID_FILTER_ARGS_COUNT;
     }
 
     public static boolean isSortItemValid(List<String> sortArgs) {
