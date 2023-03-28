@@ -90,7 +90,7 @@ public class FilterSeparatorBasedParserTest {
     }
 
     @Test
-    void parseFilterParams_onDifferentFilterSeparator_shouldThrowException() {
+    void parseFilterParams_onDifferentFilterSeparator_shouldNotCreateFilterItems() {
         List<String> filterParams = List.of("attribute;eq;");
         List<FilterItem<Object>> actual = filterSeparatorBasedParser.parseFilterParams(filterParams);
 
