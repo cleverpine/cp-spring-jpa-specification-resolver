@@ -79,4 +79,22 @@ public class FilterSeparatorBasedParserTest {
         FilterItem<Object> filterItem = actual.get(0);
         assertEquals("attribute", filterItem.getAttribute());
     }
+
+    @Test
+    void parseFilterParams_onInvalidFilterParam_shouldNotCreateFilterItems() {
+        List<String> filterParams = List.of("attribute:eq:");
+        List<FilterItem<Object>> actual = filterSeparatorBasedParser.parseFilterParams(filterParams);
+
+        assertNotNull(actual);
+        assertEquals(0, actual.size());
+    }
+
+    @Test
+    void parseFilterParams_onDifferentFilterSeparator_shouldThrowException() {
+        List<String> filterParams = List.of("attribute;eq;");
+        List<FilterItem<Object>> actual = filterSeparatorBasedParser.parseFilterParams(filterParams);
+
+        assertNotNull(actual);
+        assertEquals(0, actual.size());
+    }
 }

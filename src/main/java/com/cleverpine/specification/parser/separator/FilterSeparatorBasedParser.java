@@ -53,11 +53,7 @@ public class FilterSeparatorBasedParser implements MultipleFilterParser {
     }
 
     private boolean isValueArgOfFilterNotEmpty(List<String> filterParams) {
-        if(filterParams.size() == VALID_FILTER_ARGS_COUNT) {
-            return !filterParams.get(2).isBlank();
-        }
-
-        return false;
+        return filterParams.size() == VALID_FILTER_ARGS_COUNT && !filterParams.get(2).isBlank();
     }
 
     /**
@@ -67,12 +63,12 @@ public class FilterSeparatorBasedParser implements MultipleFilterParser {
      * Creates a {@link SingleFilterItem} if the operator is a single value operator,
      * or a {@link MultiFilterItem} if the operator is a multi-value operator.
      *
-     * @param filterParams the filter param containing filter arguments.
+     * @param filterArgs the filter param containing filter arguments.
      * @return a {@link FilterItem} parsed from the list of filter item arguments.
      * @throws InvalidSpecificationException if the list of filter item arguments is invalid.
      */
-    private <T> FilterItem<T> createFilterItem(List<String> filterParams) {
-        if (Objects.isNull(filterParams)) {
+    private <T> FilterItem<T> createFilterItem(List<String> filterArgs) {
+        if (Objects.isNull(filterArgs)) {
             throw new InvalidSpecificationException(
                     String.format(INVALID_FILTER_ARGS_COUNT, VALID_FILTER_ARGS_COUNT));
         }
@@ -80,6 +76,6 @@ public class FilterSeparatorBasedParser implements MultipleFilterParser {
         Function<String, List<String>> multipleValuesParserHandler = values -> Arrays.stream(values.split(valuesSeparator))
                 .collect(Collectors.toList());
 
-        return SpecificationUtil.createFilterItem(filterParams, multipleValuesParserHandler);
+        return SpecificationUtil.createFilterItem(filterArgs, multipleValuesParserHandler);
     }
 }
