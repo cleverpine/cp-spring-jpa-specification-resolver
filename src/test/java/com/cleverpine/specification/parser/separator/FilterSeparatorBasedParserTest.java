@@ -62,24 +62,6 @@ public class FilterSeparatorBasedParserTest {
         assertTrue(actual.isEmpty());
     }
 
-    //TODO
-//    @Test
-//    void parseFilterParams_onInvalidFilterParam_shouldThrowException() {
-//        assertThrows(
-//                InvalidSpecificationException.class,
-//                () -> filterSeparatorBasedParser.parseFilterParams(List.of("filter-invalid"))
-//        );
-//    }
-
-    // TODO
-//    @Test
-//    void parseFilterParams_onDifferentFilterSeparator_shouldThrowException() {
-//        assertThrows(
-//                InvalidSpecificationException.class,
-//                () -> filterSeparatorBasedParser.parseFilterParams(List.of("attribute;eq;34"))
-//        );
-//    }
-
     @Test
     void parseFilterParams_whenFilterOperatorIsNotFound_shouldThrowException() {
         assertThrows(
@@ -96,5 +78,23 @@ public class FilterSeparatorBasedParserTest {
         assertNotNull(actual);
         FilterItem<Object> filterItem = actual.get(0);
         assertEquals("attribute", filterItem.getAttribute());
+    }
+
+    @Test
+    void parseFilterParams_onInvalidFilterParam_shouldNotCreateFilterItems() {
+        List<String> filterParams = List.of("attribute:eq:");
+        List<FilterItem<Object>> actual = filterSeparatorBasedParser.parseFilterParams(filterParams);
+
+        assertNotNull(actual);
+        assertEquals(0, actual.size());
+    }
+
+    @Test
+    void parseFilterParams_onDifferentFilterSeparator_shouldNotCreateFilterItems() {
+        List<String> filterParams = List.of("attribute;eq;");
+        List<FilterItem<Object>> actual = filterSeparatorBasedParser.parseFilterParams(filterParams);
+
+        assertNotNull(actual);
+        assertEquals(0, actual.size());
     }
 }
