@@ -41,6 +41,6 @@ public class EndsWith<T> extends SingleValueSpecification<T> {
     public Predicate toPredicate(Root<T> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
         Expression<String> criteriaExpression = buildCriteriaExpression(root, criteriaBuilder);
 
-        return criteriaBuilder.like(criteriaExpression, "%" + getValue());
+        return criteriaBuilder.like(criteriaExpression.as(String.class), "%" + getValue());
     }
 }
