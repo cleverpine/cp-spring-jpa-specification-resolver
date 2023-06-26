@@ -2,7 +2,14 @@ package com.cleverpine.specification.core;
 
 import com.cleverpine.specification.util.QueryContext;
 import com.cleverpine.specification.util.SortDirection;
-import jakarta.persistence.criteria.*;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Expression;
+import jakarta.persistence.criteria.Order;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * A Specification for an order by clause in a JPA query (sorting by a certain property). This specification extends the {@link CriteriaExpressionSpecification} class.
@@ -36,16 +43,15 @@ public class OrderBySpecification<T> extends CriteriaExpressionSpecification<T> 
     @Override
     public Predicate toPredicate(Root<T> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
         Expression<?> criteriaExpression = buildCriteriaExpression(root, criteriaBuilder);
-        Order orderClause = createOrderClause(criteriaBuilder, criteriaExpression);
-        query.orderBy(orderClause);
+        List<Order> orderClauses = createOrderClauses(criteriaBuilder, criteriaExpression);
+        query.orderBy(orderClauses);
         return null;
     }
 
-    private Order createOrderClause(CriteriaBuilder criteriaBuilder, Expression<?> criteriaExpression) {
-        if (sortDirection.isAscending()) {
-            return criteriaBuilder.asc(criteriaExpression);
-        }
-        return criteriaBuilder.desc(criteriaExpression);
+    private List<Order> createOrderClauses(CriteriaBuilder criteriaBuilder, Expression<?> criteriaExpression) {
+        return Arrays.asList(
+                criteriaBuilder.asc(criteriaBuilder.selectCase().when(criteriaBuilder.isNull(criteriaExpression), sortDirection.isAscending() ? 1 : -1).otherwise(0)),
+                sortDirection.isAscending() ? criteriaBuilder.asc(criteriaExpression) : criteriaBuilder.desc(criteriaExpression)
+        );
     }
-
 }
